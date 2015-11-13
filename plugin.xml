@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="cordova-plugin-dcsync" version="0.1.1">
+        <name>DCSync</name>
+        <description>Cordova Datacollector Sync Plugin</description>
+        <license>Apache 2.0</license>
+        <keywords>cordova,dcsync, sync</keywords>
+        <js-module src="www/dcsync.js" name="dcsync">
+            <clobbers target="dcsync" />
+        </js-module>
+		   <!-- <platform name="ios">
+				<config-file target="config.xml" parent="/*">
+					<feature name="DCSync">
+						<param name="ios-package" value="DCSync"/>
+					</feature>
+				</config-file>
+				<header-file src="src/ios/DCSync.h" />
+				<source-file src="src/ios/DCSync.m" />
+			</platform>-->
+		 <platform name="android">
+			<config-file target="AndroidManifest.xml" parent="/manifest">
+				<uses-permission android:name="android.permission.INTERNET" />
+			</config-file>
+
+			<config-file target="AndroidManifest.xml" parent="/manifest/application">
+				<receiver android:name="at.kju.datacollector.StartupBroadcastReceiver" >
+					<intent-filter>
+						<action android:name="android.intent.action.BOOT_COMPLETED" />
+						<action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+						<action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+					</intent-filter>
+				</receiver>
+				<service android:enabled="true"
+						 android:exported="true"
+						 android:isolatedProcess="false"
+						 android:label="syncService"
+						 android:name="at.kju.datacollector.SyncService">
+				</service>
+			</config-file>
+		
+			<source-file src="at/kju/datacollector/SyncService.java" target-dir="src/at/kju/datacollector" />
+			<!--<resource-file src="FooPluginStrings.xml" target="res/values/FooPluginStrings.xml" />-->
+        </platform>
+    </plugin>
