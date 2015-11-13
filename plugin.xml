@@ -37,7 +37,7 @@
 				</service>
 			</config-file>
 		
-			<source-file src="SyncService.java" target-dir="src/at/kju/datacollector" />
+			<source-file src="src/android/SyncService.java" target-dir="src/at/kju/datacollector" />
 			<!--<resource-file src="FooPluginStrings.xml" target="res/values/FooPluginStrings.xml" />-->
         </platform>
     </plugin>
