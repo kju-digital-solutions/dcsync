@@ -121,61 +121,82 @@ DCSync.prototype._onDelegateCallback = function (deferred, pluginResult) {
 		console.error('Delegate registration promise is already been resolved, all subsequent callbacks should provide an "eventType" field.');
 	}
 }; 
+
+/**
+ * Wraps a Cordova exec call into a promise, allowing the client code to
+ * operate with those promises instead of callbacks.
+ *
+ * @param {String} method The name of the method in the native layer to be
+ * called by Cordova.
+ *
+ * @param {Array} commandArgs An array of arguments to be passed for the
+ * native layer. Defaults to an empty array if omitted.
+ *
+* 
+ * @returns {Q.Promise}
+ */
+LocationManager.prototype._promisedExec = function (method, commandArgs) {
+	var d = Q.defer();
+	exec(resolveWrap, d.reject, "DCSync", d.resolve, commandArgs);
+	return d.promise;
+};
+
+
 /*
 calls resultCallback with <date> of last sync
 */
 DCSync.prototype.getLastSync = function() {
-	return this._promisedExec('getLastSync', [], []);
+	return this._promisedExec('getLastSync', []);
 }
 /*
 retrieves the number of documents in a given path
 calls resultCallback with { count: <int>, unsynced: <int> }
 */
 DCSync.prototype.getDocumentCount = function(path) {
-	return this._promisedExec('getDocumentCount', [path], []);
+	return this._promisedExec('getDocumentCount', [path]);
 }
 /*
 calls resultCallback with <string> of a file url to the Synced File root folder including a trailing slash
 */
 DCSync.prototype.getContentRootUri = function() {
-	return this._promisedExec('getContentRootUri', [], []);
+	return this._promisedExec('getContentRootUri', []);
 }
 /*
 returns a new unique (random) Content Id (cid) in the following format:
 E621E1F8-C36C-495A-93FC-0C247A3E6E5F
 */
 DCSync.prototype.newDocumentCid = function() {
-	return this._promisedExec('newDocumentCid', [], []);
+	return this._promisedExec('newDocumentCid', []);
 }
 /*
 Saves a document to local storage,
 creates a new document or overwrites an existing one (depending on cid )
 */
 DCSync.prototype.saveDocument = function(cid, path, document, files, upload ) {
-	return this._promisedExec('saveDocument', [cid, path, document, files, upload], []);
+	return this._promisedExec('saveDocument', [cid, path, document, files, upload]);
 }
 /*
 Marks a document as deleted
 */
 DCSync.prototype.deleteDocument = function(cid ) {
-	return this._promisedExec('deleteDocument', [cid], []);
+	return this._promisedExec('deleteDocument', [cid]);
 }
 /*
 triggers a sync
 */
 DCSync.prototype.performSync = function() {
-	return this._promisedExec('performSync', [], []);
+	return this._promisedExec('performSync', []);
 }
 /*
 */
 DCSync.prototype.setSyncOptions = function( options ) {
-	return this._promisedExec('setSyncOptions', [options], []);
+	return this._promisedExec('setSyncOptions', [options]);
 }
 /*
 retrieves list of documents for a given path with filter options
 */
 DCSync.prototype.searchDocuments = function(path, options) {
-	return this._promisedExec('searchDocuments', [path, options], []);
+	return this._promisedExec('searchDocuments', [path, options]);
 }
 /*
 */
