@@ -16,9 +16,6 @@
 			<merges target="cordova.plugins"/>
 		</js-module>
 		
-        <js-module src="www/dcsync.js" name="dcsync">
-            <clobbers target="dcsync" />
-        </js-module>
 		   <!-- <platform name="ios">
 				<config-file target="config.xml" parent="/*">
 					<feature name="DCSync">
