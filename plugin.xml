@@ -43,13 +43,13 @@
 			</config-file>
 
 			<config-file target="res/values/strings.xml" parent="/*">
-				<string name="aam_account_type">MyAccountType</string>
+				<string name="aam_account_type">at.kju.datacollector</string>
 			</config-file> 
 			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			
 				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="at.kju.datacollector" />
-				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="false" android:label="DCSync">
+				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="false">
 					<intent-filter>
 						<action android:name="android.accounts.AccountAuthenticator" />
 					</intent-filter>
