@@ -23,11 +23,11 @@ public class Constants {
 	/**
 	 * Account type string.
 	 */
-	public static final String ACCOUNT_TYPE = "at.sicom.datacollector";
+	public static final String ACCOUNT_TYPE = "at.kju.datacollector";
 
-	public static final String AUTHTOKEN_TYPE = "at.sicom.datacollector";
+	public static final String AUTHTOKEN_TYPE = "at.kju.datacollector";
 
-	public static final String CONTENT_AUTHORITY = "at.sicom.datacollector";
+	public static final String CONTENT_AUTHORITY = "at.kju.datacollector";
 	
 	public static final String SYNCFINISHED = "onSyncFinished";
 
@@ -41,7 +41,7 @@ public class Constants {
 
 	public static final String COMMON_DIR = "common";
 
-	public static final String SYNC_PROGRESS = "at.sicom.datacollector.SYNC_PROGRESS";
+	public static final String SYNC_PROGRESS = "at.kju.datacollector.SYNC_PROGRESS";
 
 	public static final String SYNC_PROGRESS_EXTRA = "progress";
 
