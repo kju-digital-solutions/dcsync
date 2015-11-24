@@ -78,14 +78,8 @@ public class DCDataHelper extends SQLiteOpenHelper {
 		Log.d("EventsData", "onCreate SETTINGS: " + sql);
 		db.execSQL(sql);
 
-		//create unique device id
-	    final TelephonyManager tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
-	    final String tmDevice, tmSerial, androidId;
-	    tmDevice = "" + tm.getDeviceId();
-	    tmSerial = "" + tm.getSimSerialNumber();
-	    androidId = "" + android.provider.Settings.Secure.getString(ctx.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
-	    UUID deviceUuid = new UUID(androidId.hashCode(), ((long)tmDevice.hashCode() << 32) | tmSerial.hashCode());
-    	db.execSQL("insert into " + SETTINGS_TABLE + "(" + DEVICE_UUID + "," + URL + "," + JSONDATA +  ") values('" + deviceUuid + "','" + Constants.SYNC_URL + "','')");
+	    UUID deviceUuid = UUID.randomUUID();
+    	db.execSQL("insert into " + SETTINGS_TABLE + "(" + DEVICE_UUID + "," + JSONDATA +  ") values('" + deviceUuid + "','{}')");
 	}
 
 	@Override

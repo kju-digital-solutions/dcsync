@@ -42,7 +42,7 @@ public class DCSync extends CordovaPlugin {
 
     @Override
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
-        if ("bind".equals(action)) {
+        if ("registerCallback".equals(action)) {
             if (this.callbackContext != null) {
                 callbackContext.error("already bound");
                 return true;
@@ -167,10 +167,10 @@ public class DCSync extends CordovaPlugin {
                             s.setLocale(options.getString("locale"));
                         if( options.has("interval"))
                             s.setInterval(options.getLong("interval"));
-                        //if( options.has("username"))
-                        //    s.set(options.getString("url"));
-                        //if( options.has("password"))
-                        //    s.setInterval(options.getLong("interval"));
+                        if( options.has("username"))
+                            s.setUsername(options.getString("username"));
+                        if( options.has("password"))
+                            s.setPassword(options.getString("password"));
                         if( options.has("params"))
                             s.setParams(options.getJSONObject("params"));
                         if( options.has("event_filter"))

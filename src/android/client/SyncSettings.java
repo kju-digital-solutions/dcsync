@@ -1,20 +1,49 @@
 package at.kju.datacollector.client;
 
+import android.util.Base64;
+
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 public class SyncSettings {
 	private Date lastSyncDate;
 	private String lastSyncTimestamp;
 	private String duid;
+	private String username;
+	private String passwordHash;
 	private String locale;
+
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public String getPasswordHash() {
+		return passwordHash;
+	}
+
+	public void setPasswordHash(String password) {
+		this.passwordHash = password;
+	}
+
+	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-512");
+		byte[] hash = digest.digest(password.getBytes("UTF-8"));
+		this.passwordHash = Base64.encodeToString(hash,Base64.DEFAULT);
+	}
 	private String url;
 	private JSONObject eventFilter;
 	private JSONObject params;
 	private long interval;
 
-	public SyncSettings(Date lastSyncDate, String lastSyncTimestamp, String duid, String locale, String url, JSONObject eventFilter, JSONObject params, int interval) {
+	public SyncSettings(Date lastSyncDate, String lastSyncTimestamp, String duid, String locale, String url, JSONObject eventFilter, JSONObject params, int interval, String username, String passwordHash) {
 		this.lastSyncDate = lastSyncDate;
 		this.lastSyncTimestamp = lastSyncTimestamp;
 		this.duid = duid;
@@ -23,8 +52,10 @@ public class SyncSettings {
 		this.eventFilter = eventFilter;
 		this.params = params;
 		this.interval = interval;
+		this.username = username;
+		this.passwordHash = passwordHash;
 	}
-	public SyncSettings(JSONObject obj) {
+	public SyncSettings(JSONObject obj) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		this.lastSyncDate = new Date(obj.optLong("lastSyncDate", 0));
 		this.lastSyncTimestamp = obj.optString("lastSyncTimestamp");
 		this.duid = obj.optString("duid");
@@ -33,6 +64,11 @@ public class SyncSettings {
 		this.eventFilter = obj.optJSONObject("eventFilter");
 		this.params =obj.optJSONObject("params");
 		this.interval = obj.optLong("interval");
+		this.interval = obj.optLong("username");
+		this.interval = obj.optLong("password_hash");
+		if( obj.has("password")) {
+			this.setPassword(obj.optString("password", ""));
+		}
 	}
 
 	public SyncSettings() {
@@ -44,10 +80,12 @@ public class SyncSettings {
 			obj.put("lastSyncDate", getLastSyncDate());
 			obj.put("lastSyncTimestamp", getLastSyncTimestamp());
 			obj.put("locale", getLocale() );
-			obj.put("url", getUrl() );
+			obj.put("url", getUrl());
 			obj.put("eventFilter", getEventFilter() );
 			obj.put("params", getParams() );
 			obj.put("interval", getInterval() );
+			obj.put("username", getInterval() );
+			obj.put("password_hash", getInterval() );
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);

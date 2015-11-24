@@ -84,19 +84,20 @@ public class LocalStorageSyncManager {
 		SyncSettings settingsOld = repo.getSyncSettings();
 		repo.setSyncSettings(settings);
 
-		ensureAccount();
+		ensureAccount(settings);
 
 		if( settingsOld.getInterval() != settings.getInterval()) {
 			syncIntervalChanged(settings);
 		}
 	}
-	public void ensureAccount() {
+	public void ensureAccount(SyncSettings settings) {
 		AccountManager am = AccountManager.get(mCtx);
 		Account[] accounts = am.getAccountsByType(Constants.ACCOUNT_TYPE);
 
 		if( accounts.length == 0) {
 			//todo: async?
-			am.addAccount(Constants.ACCOUNT_TYPE, Constants.AUTHTOKEN_TYPE, null, null, null, null, null);
+			Account account = new Account(settings.getUsername(), Constants.ACCOUNT_TYPE);
+			am.addAccountExplicitly(account, settings.getPasswordHash(), null);
 		}
 
 	}
