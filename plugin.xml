@@ -26,6 +26,11 @@
 				<source-file src="src/ios/DCSync.m" />
 			</platform>-->
 		 <platform name="android">
+			<config-file target="res/xml/config.xml" parent="/*">
+				<feature name="DCSync" >
+					<param name="android-package" value="at.kju.datacollector.DCSync"/>
+				</feature>
+			</config-file>
 			<config-file target="AndroidManifest.xml" parent="/manifest">
 				<uses-permission android:name="android.permission.INTERNET" />
 			</config-file>
@@ -48,9 +53,9 @@
 		
 			<source-file src="src/android/Constants.java" target-dir="src/at/kju/datacollector" />
 			<source-file src="src/android/DCSync.java" target-dir="src/at/kju/datacollector" />
-			<source-file src="src/android/authenticator/AuthenticationService.java" target-dir="src/at/kju/datacollector/autenticator" />
-			<source-file src="src/android/authenticator/Authenticator.java" target-dir="src/at/kju/datacollector/autenticator" />
-			<source-file src="src/android/authenticator/JsonHelper.java" target-dir="src/at/kju/datacollector/autenticator" />
+			<source-file src="src/android/authenticator/AuthenticationService.java" target-dir="src/at/kju/datacollector/authenticator" />
+			<source-file src="src/android/authenticator/Authenticator.java" target-dir="src/at/kju/datacollector/authenticator" />
+			<source-file src="src/android/authenticator/JsonHelper.java" target-dir="src/at/kju/datacollector/authenticator" />
 			<source-file src="src/android/client/DCDocument.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/MultipartUtility.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/NetworkUtilities.java" target-dir="src/at/kju/datacollector/client" />
