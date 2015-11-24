@@ -46,9 +46,9 @@ public class DCContentProvider extends ContentProvider {
 	private static UriMatcher buildUriMatcher() {
 		UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
 		// to get definitions...
-		matcher.addURI(Constants.CONTENT_AUTHORITY, "forms", DC_DOCUMENTS);
-		matcher.addURI(Constants.CONTENT_AUTHORITY, "formdata", DOCUMENTS);
-		matcher.addURI(Constants.CONTENT_AUTHORITY, "formdata/#", DOCUMENT);
+		matcher.addURI(Constants.CONTENT_AUTHORITY, "dcdocuments", DC_DOCUMENTS);
+		matcher.addURI(Constants.CONTENT_AUTHORITY, "document", DOCUMENTS);
+		matcher.addURI(Constants.CONTENT_AUTHORITY, "document/#", DOCUMENT);
 		matcher.addURI(Constants.CONTENT_AUTHORITY, "settings", SETTINGS);
 		return matcher;
 	}

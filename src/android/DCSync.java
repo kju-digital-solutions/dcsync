@@ -66,7 +66,7 @@ public class DCSync extends CordovaPlugin {
                     try {
                         JSONObject obj = new JSONObject();
                         SyncSettings s = lssm.getSyncSettings();
-                        obj.put("syncDate", s.getLastSyncDate());
+                        obj.put("syncDate", s.getLastSyncDate().getTime());
                         callbackContext.success(obj);
                     } catch (Exception ex) {
                         callbackContext.error(ex.toString());
@@ -104,7 +104,6 @@ public class DCSync extends CordovaPlugin {
             });
         }
         else if ("newDocumentCid".equals(action)) {
-            final String path = args.getString(0);
             cordova.getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     try {

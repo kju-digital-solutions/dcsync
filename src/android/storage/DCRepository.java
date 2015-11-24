@@ -89,7 +89,7 @@ public class DCRepository {
 
 
             c = cp.query(DCContentProvider.DOCUMENTS_URI, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE, DCDataHelper.LOCAL},
-                    where , (String[])params.toArray(), null);
+                    where , params.toArray(new String[params.size()]), null);
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);
@@ -144,7 +144,7 @@ public class DCRepository {
 
 
             c = cp.query(DCContentProvider.DOCUMENTS_URI, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE},
-                    where , (String[])params.toArray(), null);
+                    where ,params.toArray(new String[params.size()]), null);
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);

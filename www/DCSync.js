@@ -172,8 +172,10 @@ DCSync.prototype.newDocumentCid = function() {
 Saves a document to local storage,
 creates a new document or overwrites an existing one (depending on cid )
 */
-DCSync.prototype.saveDocument = function(cid, path, document, files, upload ) {
-	return this._promisedExec('saveDocument', [cid, path, document, files, upload]);
+DCSync.prototype.saveDocument = function(cid, path, document, files, local ) {
+	if( files == null)
+		files = [];
+	return this._promisedExec('saveDocument', [cid, path, document, files, local]);
 }
 /*
 Marks a document as deleted
