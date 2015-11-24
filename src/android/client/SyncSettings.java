@@ -64,8 +64,8 @@ public class SyncSettings {
 		this.eventFilter = obj.optJSONObject("eventFilter");
 		this.params =obj.optJSONObject("params");
 		this.interval = obj.optLong("interval");
-		this.interval = obj.optLong("username");
-		this.interval = obj.optLong("password_hash");
+		this.username = obj.optString("username");
+		this.passwordHash = obj.optString("password_hash");
 		if( obj.has("password")) {
 			this.setPassword(obj.optString("password", ""));
 		}
@@ -84,8 +84,8 @@ public class SyncSettings {
 			obj.put("eventFilter", getEventFilter() );
 			obj.put("params", getParams() );
 			obj.put("interval", getInterval() );
-			obj.put("username", getInterval() );
-			obj.put("password_hash", getInterval() );
+			obj.put("username", getUsername() );
+			obj.put("password_hash", getPasswordHash() );
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);

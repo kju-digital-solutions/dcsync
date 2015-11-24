@@ -133,7 +133,7 @@ public class DCContentProvider extends ContentProvider {
 		try {
 			int typeconst = sURIMatcher.match(uri);
 			for(ContentValues cv : values) {
-				db.insert(TABLE_MAP[typeconst], "", cv);
+				db.insertOrThrow(TABLE_MAP[typeconst], "", cv);
 			}
 			db.setTransactionSuccessful();
 			getContext().getContentResolver().notifyChange(uri, null,false);

@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -122,12 +123,26 @@ public class DCSync extends CordovaPlugin {
             dcd.setFiles(args.getJSONArray(3).join(";"));
             dcd.setLocal( args.getBoolean(4));
 
+
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
                     try {
+                        SyncSettings settings = lssm.getSyncSettings();
+                        if( dcd.getCreatorUser() == null ||  dcd.getCreatorUser().isEmpty() )
+                            dcd.setCreatorUser(settings.getUsername());
+                        if( dcd.getCreatorDuid() == null ||  dcd.getCreatorDuid().isEmpty())
+                            dcd.setCreatorDuid(settings.getDuid());
+                        if( dcd.getCreationDate() == 0)
+                            dcd.setCreationDate(lssm.getUTCDate());
+                        dcd.setModifiedUser(settings.getUsername());
+                        dcd.setModifiedDuid(settings.getDuid());
+                        dcd.setModifiedDate(lssm.getUTCDate());
+
                         ArrayList list = new ArrayList<DCDocument>();
                         list.add(dcd);
-                        lssm.saveData(list, false, null);
+                        int count = lssm.saveData(list, false, null);
+                        if( count != 1)
+                            throw new Exception("Document could not be saved, maybe not all fields provided?");
                         callbackContext.success(lssm.getData(dcd.getCid()).toJSON());
                     } catch (Exception ex) {
                         callbackContext.error(ex.toString());
@@ -184,7 +199,7 @@ public class DCSync extends CordovaPlugin {
         }
         else if ("searchDocuments".equals(action)) {
 
-            final JSONArray documentFilter = args.getJSONArray(0);
+            final JSONObject documentFilter = args.getJSONObject(0);
             final JSONObject options = args.getJSONObject(1);
 
             cordova.getThreadPool().execute(new Runnable() {
@@ -198,11 +213,12 @@ public class DCSync extends CordovaPlugin {
                             where += "path=? ";
                             params.add(options.getString("path"));
                         }
-                        for( int i = 0; i < documentFilter.length(); i++) {
-                            JSONObject filter = documentFilter.getJSONObject(i);
-                            fields.put( filter.getString("field"), filter.getString("value"));
+                        Iterator<String> it = documentFilter.keys();
+                        while ( it.hasNext()) {
+                            String field =  it.next();
+                            fields.put( field, documentFilter.getString(field));
                         }
-                        List<DCDocument> list = lssm.searchDCDocuments(where,(String[])params.toArray(),fields, options.optBoolean("exactMatch", false), options.optInt("skipResults", 0), options.optInt("maxResults", 100));
+                        List<DCDocument> list = lssm.searchDCDocuments(where,params.toArray(new String[params.size()]),fields, options.optBoolean("exactMatch", false), options.optInt("skipResults", 0), options.optInt("maxResults", 100));
                         JSONArray arr = new JSONArray();
                         for( DCDocument dc : list) {
                             arr.put(dc.toJSON());

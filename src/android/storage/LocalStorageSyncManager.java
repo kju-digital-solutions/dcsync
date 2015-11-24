@@ -20,10 +20,12 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 
 import at.kju.datacollector.Constants;
 import at.kju.datacollector.client.DCDocument;
@@ -157,13 +159,13 @@ public class LocalStorageSyncManager {
 	}
 
 
-	public void saveData(List<DCDocument> dcDocs, boolean fromServer, Progress p ) throws Exception {
+	public int saveData(List<DCDocument> dcDocs, boolean fromServer, Progress p ) throws Exception {
 		Cursor c = null;
 		List<DCDocument> fdlist = new ArrayList<DCDocument>(); //copy list
 		fdlist.addAll(dcDocs);
-		
+		int changes = 0;
 		ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
-		String deviceUUID = repo.getSetting(DCDataHelper.DEVICE_UUID);
+		SyncSettings settings = repo.getSyncSettings();
 		HashMap<String, Integer> existing = new HashMap<String, Integer>();
 		ArrayList<ContentProviderOperation> todelete = new ArrayList<ContentProviderOperation>();
 		try {
@@ -206,22 +208,23 @@ public class LocalStorageSyncManager {
 				cv.put(DCDataHelper.LOCAL, fd.isLocal() ? 1 : 0);
 				cv.put(DCDataHelper.FILES, fd.getFiles());
 				if( fromServer) {
-					cv.put(DCDataHelper.MODIFIED_DATE, fd.getModifiedDate());
 					cv.put(DCDataHelper.SERVER_MODIFIED, fd.getServerModified());
-					cv.put(DCDataHelper.CREATION_DATE, fd.getCreationDate());
 				}
-				else {
-					cv.put(DCDataHelper.MODIFIED_DATE, new Date().getTime());
-				}
+
+				cv.put(DCDataHelper.MODIFIED_DATE, fromServer ? fd.getModifiedDate() : getUTCDate());
+				cv.put(DCDataHelper.MODIFIED_DUID, fromServer ? fd.getModifiedDuid() : settings.getDuid());
+				cv.put(DCDataHelper.MODIFIED_USER, fromServer ? fd.getModifiedUser() : settings.getUsername());
+
 				if( !existing.containsKey(fd.getCid())) {
 					cv.put(DCDataHelper.CID, fd.getCid());
-					cv.put(DCDataHelper.CREATION_DATE, fromServer ? fd.getCreationDate() : new Date().getTime());
-					cv.put(DCDataHelper.CREATOR_DUID, fromServer ? fd.getCreatorDuid() :  deviceUUID);
-					cv.put(DCDataHelper.SYNC_STATE, fromServer ? DCDataHelper.SYNC_STATE_SYNCED : DCDataHelper.SYNC_STATE_NEW);
+					cv.put(DCDataHelper.CREATION_DATE, fromServer ? fd.getCreationDate() : getUTCDate());
+					cv.put(DCDataHelper.CREATOR_DUID, fromServer ? fd.getCreatorDuid() :  settings.getDuid());
+					cv.put(DCDataHelper.CREATOR_USER, fromServer ? fd.getCreatorUser() : settings.getUsername());
+					cv.put(DCDataHelper.SYNC_STATE, (fromServer || fd.isLocal()) ? DCDataHelper.SYNC_STATE_SYNCED : DCDataHelper.SYNC_STATE_NEW);
 					insertValues.add(cv);
 				}
 				else {
-					cv.put(DCDataHelper.SYNC_STATE, (fromServer && !fd.isLocal()) ? DCDataHelper.SYNC_STATE_SYNCED :  DCDataHelper.SYNC_STATE_MODIFIED  );
+					cv.put(DCDataHelper.SYNC_STATE, (fromServer || fd.isLocal()) ? DCDataHelper.SYNC_STATE_SYNCED :  DCDataHelper.SYNC_STATE_MODIFIED  );
 					updates.add( ContentProviderOperation.newUpdate(DCContentProvider.DOCUMENTS_URI).withSelection(DCDataHelper.CID + "=?", new String[]{fd.getCid()}).withValues(cv).build());
 				}
 				i++;
@@ -229,18 +232,19 @@ public class LocalStorageSyncManager {
 					p.setRecordsdone(p.getRecordsdone() + 1);
 				
 			}
+
 			//update
 			if( updates.size() > 0) {
-				cp.applyBatch(updates);
+				changes += cp.applyBatch(updates).length;
 			}
 			//delete
 			if( todelete.size() > 0) {
-				cp.applyBatch(todelete);
+				changes += cp.applyBatch(todelete).length;
 			}
 			//insert
 			if( insertValues.size() > 0) {
 				ContentValues[] iv = new ContentValues[insertValues.size()];
-				cp.bulkInsert(DCContentProvider.DOCUMENTS_URI, insertValues.toArray(iv));
+				changes +=cp.bulkInsert(DCContentProvider.DOCUMENTS_URI, insertValues.toArray(iv));
 			}
 		}
 		catch(Exception ex) {
@@ -249,7 +253,8 @@ public class LocalStorageSyncManager {
 			if( c!= null)
 				c.close();
 			cp.release();
-		}		
+		}
+		return changes;
 	}
 	
 	public DCDocument getData(String uuid) throws Exception {
@@ -274,6 +279,18 @@ public class LocalStorageSyncManager {
 
 	public Context getContext() {
 		return mCtx;
+	}
+
+	public long getUTCDate() {
+		SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+		SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		try {
+			return dateFormatLocal.parse(dateFormatGmt.format(new Date())).getTime();
+		}
+		catch( Exception ex) {
+			return new Date().getTime();
+		}
 	}
 
 	/*public String storePicture(String path, String filename, int imgSizeX, int imgSizeY, Integer resizeFlags, InputStream is) throws IOException {
