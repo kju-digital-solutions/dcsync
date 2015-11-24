@@ -135,7 +135,7 @@ DCSync.prototype._onDelegateCallback = function (deferred, pluginResult) {
 * 
  * @returns {Q.Promise}
  */
-LocationManager.prototype._promisedExec = function (method, commandArgs) {
+DCSync.prototype._promisedExec = function (method, commandArgs) {
 	var d = Q.defer();
 	exec(resolveWrap, d.reject, "DCSync", d.resolve, commandArgs);
 	return d.promise;
