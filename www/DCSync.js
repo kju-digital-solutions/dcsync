@@ -99,9 +99,11 @@ DCSync.prototype.emit = function() {
 DCSync.prototype._registerCallback = function () {
 	//this.appendToDeviceLog('registerDelegateCallbackId()');
 	var d = Q.defer();
-
-	exec(_.bind(this._onDelegateCallback, this, d), d.reject, "DCSync",
-		"registerCallback", []);
+	var that = this;
+	exec( 
+		function(pluginResult) { that._onDelegateCallback(d, pluginResult);},
+		d.reject, "DCSync", "registerCallback", []
+	);
 
 	return d.promise;
 };
@@ -111,7 +113,7 @@ DCSync.prototype._onDelegateCallback = function (deferred, pluginResult) {
 
 	//this.appendToDeviceLog('_onDelegateCallback() ' + JSON.stringify(pluginResult));
 
-	if (pluginResult && _.isString(pluginResult['eventType'])) { // The native layer calling the DOM with a delegate event.
+	if (pluginResult && pluginResult['eventType']) { // The native layer calling the DOM with a delegate event.
 		this.emit(pluginResult['eventType'], pluginResult);
 	} else if (Q.isPending(deferred.promise)) { // The callback ID registration finished, runs only once.
 		deferred.resolve();
@@ -123,57 +125,57 @@ DCSync.prototype._onDelegateCallback = function (deferred, pluginResult) {
 calls resultCallback with <date> of last sync
 */
 DCSync.prototype.getLastSync = function() {
-	return this._promisedExec('disableDebugNotifications', [], []);
+	return this._promisedExec('getLastSync', [], []);
 }
 /*
 retrieves the number of documents in a given path
 calls resultCallback with { count: <int>, unsynced: <int> }
 */
 DCSync.prototype.getDocumentCount = function(path) {
-	return this._promisedExec('disableDebugNotifications', [path], []);
+	return this._promisedExec('getDocumentCount', [path], []);
 }
 /*
 calls resultCallback with <string> of a file url to the Synced File root folder including a trailing slash
 */
 DCSync.prototype.getContentRootUri = function() {
-	return this._promisedExec('disableDebugNotifications', [], []);
+	return this._promisedExec('getContentRootUri', [], []);
 }
 /*
 returns a new unique (random) Content Id (cid) in the following format:
 E621E1F8-C36C-495A-93FC-0C247A3E6E5F
 */
 DCSync.prototype.newDocumentCid = function() {
-	return this._promisedExec('disableDebugNotifications', [], []);
+	return this._promisedExec('newDocumentCid', [], []);
 }
 /*
 Saves a document to local storage,
 creates a new document or overwrites an existing one (depending on cid )
 */
 DCSync.prototype.saveDocument = function(cid, path, document, files, upload ) {
-	return this._promisedExec('disableDebugNotifications', [cid, path, document, files, upload], []);
+	return this._promisedExec('saveDocument', [cid, path, document, files, upload], []);
 }
 /*
 Marks a document as deleted
 */
 DCSync.prototype.deleteDocument = function(cid ) {
-	return this._promisedExec('disableDebugNotifications', [cid], []);
+	return this._promisedExec('deleteDocument', [cid], []);
 }
 /*
 triggers a sync
 */
 DCSync.prototype.performSync = function() {
-	return this._promisedExec('disableDebugNotifications', [], []);
+	return this._promisedExec('performSync', [], []);
 }
 /*
 */
 DCSync.prototype.setSyncOptions = function( options ) {
-	return this._promisedExec('disableDebugNotifications', [options], []);
+	return this._promisedExec('setSyncOptions', [options], []);
 }
 /*
 retrieves list of documents for a given path with filter options
 */
 DCSync.prototype.searchDocuments = function(path, options) {
-	return this._promisedExec('disableDebugNotifications', [path, options], []);
+	return this._promisedExec('searchDocuments', [path, options], []);
 }
 /*
 */

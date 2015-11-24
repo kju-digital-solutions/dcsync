@@ -4,6 +4,18 @@
         <description>Cordova Datacollector Sync Plugin</description>
         <license>Apache 2.0</license>
         <keywords>cordova,dcsync, sync</keywords>
+		
+		    <!-- Third party libraries -->
+  
+		<js-module name="Q" src="www/lib/q.min.js">
+			<runs/>
+		</js-module>
+    
+		<!-- Plugin source code: Core -->
+		<js-module name="DCSync" src="www/DCSync.js">
+			<merges target="cordova.plugins"/>
+		</js-module>
+		
         <js-module src="www/dcsync.js" name="dcsync">
             <clobbers target="dcsync" />
         </js-module>
