@@ -224,7 +224,6 @@ public class NetworkUtilities {
 
 			urlconn.setRequestMethod("post");
 			mphelper.prepareConnection();
-			SimpleMultipartEntity rE = new SimpleMultipartEntity();
 			mphelper.addFormField("u", account.name);
 			mphelper.addFormField("t", authtoken);
 			mphelper.addFormField("v", appVersion);

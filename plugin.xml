@@ -46,6 +46,7 @@
 			<source-file src="src/android/client/MultipartUtility.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/NetworkUtilities.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/SyncSettings.java" target-dir="src/at/kju/datacollector/client" />
+			<source-file src="src/android/client/Progress.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/storage/DCContentProvider.java" target-dir="src/at/kju/datacollector/storage" />
 			<source-file src="src/android/storage/DCDataHelper.java" target-dir="src/at/kju/datacollector/storage" />
 			<source-file src="src/android/storage/DCRepository.java" target-dir="src/at/kju/datacollector/storage" />
