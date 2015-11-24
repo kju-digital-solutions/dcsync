@@ -37,7 +37,22 @@
 				</service>
 			</config-file>
 		
-			<source-file src="src/android/SyncService.java" target-dir="src/at/kju/datacollector" />
+			<source-file src="SyncService.java" target-dir="src/at/kju/datacollector" />
+			<source-file src="Constants.java" target-dir="src/at/kju/datacollector" />
+			<source-file src="DCSync.java" target-dir="src/at/kju/datacollector" />
+			<source-file src="authenticator/AuthenticationService.java" target-dir="src/at/kju/datacollector/autenticator" />
+			<source-file src="authenticator/Authenticator.java" target-dir="src/at/kju/datacollector/autenticator" />
+			<source-file src="authenticator/JsonHelper.java" target-dir="src/at/kju/datacollector/autenticator" />
+			<source-file src="client/DCDocument.java" target-dir="src/at/kju/datacollector/client" />
+			<source-file src="client/MultipartUtility.java" target-dir="src/at/kju/datacollector/client" />
+			<source-file src="client/NetworkUtilities.java" target-dir="src/at/kju/datacollector/client" />
+			<source-file src="client/SyncSettings.java" target-dir="src/at/kju/datacollector/client" />
+			<source-file src="storage/DCContentProvider.java" target-dir="src/at/kju/datacollector/storage" />
+			<source-file src="storage/DCDataHelper.java" target-dir="src/at/kju/datacollector/storage" />
+			<source-file src="storage/DCRepository.java" target-dir="src/at/kju/datacollector/storage" />
+			<source-file src="storage/LocalStorageSyncManager.java" target-dir="src/at/kju/datacollector/storage" />
+			<source-file src="syncadapter/SyncAdapter.java" target-dir="src/at/kju/datacollector/syncadapter" />
+			<source-file src="syncadapter/SyncService.java" target-dir="src/at/kju/datacollector/syncadapter" />
 			<!--<resource-file src="FooPluginStrings.xml" target="res/values/FooPluginStrings.xml" />-->
         </platform>
     </plugin>
