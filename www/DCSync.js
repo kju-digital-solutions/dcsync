@@ -34,10 +34,9 @@ var Q = require('at.kju.datacollector.dcsync.Q');
  function DCSync (){
  
 	this._handlers= {
-			'onSyncCompleted': [],
-			'onSyncFailed': [],
-			'onSyncProgress': [],
-			'onLoginRequired': [],
+			'sync_completed': [],
+			'sync_failed': [],
+			'sync_progress': []
 			}
  }
  
@@ -46,10 +45,9 @@ var Q = require('at.kju.datacollector.dcsync.Q');
  *
  * The following events are supported:
  *
- *   - progress
- *   - cancel
- *   - error
- *   - completion
+ *   - sync_completed
+ *   - sync_failed
+ *   - sync_progress
  *
  * @param {String} eventName to subscribe to.
  * @param {Function} callback triggered on the event.
@@ -58,6 +56,7 @@ DCSync.prototype.on = function(eventName, callback) {
     if (this._handlers.hasOwnProperty(eventName)) {
         this._handlers[eventName].push(callback);
     }
+	this._registerCallback();
 };
 
 /**
