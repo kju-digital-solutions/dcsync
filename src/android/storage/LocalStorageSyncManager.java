@@ -95,11 +95,11 @@ public class LocalStorageSyncManager {
 		Account[] accounts = am.getAccountsByType(Constants.ACCOUNT_TYPE);
 
 		if( accounts.length == 0) {
-			//todo: async?
 			Account account = new Account(settings.getUsername(), Constants.ACCOUNT_TYPE);
 			am.addAccountExplicitly(account, settings.getPasswordHash(), null);
+			ContentResolver.setIsSyncable(account, Constants.CONTENT_AUTHORITY, 1);
+			ContentResolver.setSyncAutomatically(account, Constants.CONTENT_AUTHORITY, true);
 		}
-
 	}
 	public void syncIntervalChanged(SyncSettings settings) {
 
