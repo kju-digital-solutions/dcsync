@@ -137,7 +137,7 @@ DCSync.prototype._onDelegateCallback = function (deferred, pluginResult) {
  */
 DCSync.prototype._promisedExec = function (method, commandArgs) {
 	var d = Q.defer();
-	exec(resolveWrap, d.reject, "DCSync", d.resolve, commandArgs);
+	exec(d.resolve, d.reject, "DCSync", method , commandArgs);
 	return d.promise;
 };
 
