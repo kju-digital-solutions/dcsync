@@ -63,6 +63,7 @@
 			</config-file>
 		
 			<resource-file src="res/xml/authenticator.xml" target="res/xml/authenticator.xml" />
+			<resource-file src="res/xml/syncadapter.xml" target="res/xml/syncadapter.xml" />
 			
 			<source-file src="src/android/Constants.java" target-dir="src/at/kju/datacollector" />
 			<source-file src="src/android/DCSync.java" target-dir="src/at/kju/datacollector" />
