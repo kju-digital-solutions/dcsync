@@ -42,21 +42,28 @@
 				<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 			</config-file>
 
+			<config-file target="res/values/strings.xml" parent="/*">
+				<string name="aam_account_type">MyAccountType</string>
+			</config-file> 
+			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
-				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="DCSync" />
-				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="true" android:label="DCSync">
+			
+				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="at.kju.datacollector" />
+				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="false" android:label="DCSync">
 					<intent-filter>
 						<action android:name="android.accounts.AccountAuthenticator" />
 					</intent-filter>
-					<meta-data android:name="android.accounts.AccountAuthenticator" />
+					<meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator"/>
 				</service>
 				<service android:name="at.kju.datacollector.syncadapter.SyncService" android:exported="false" >
 					<intent-filter><action android:name="android.content.SyncAdapter" /></intent-filter>
-					<meta-data android:name="android.content.SyncAdapter" />
+					<meta-data android:name="android.content.SyncAdapter" android:resource="@xml/syncadapter" />
 				</service>
 				
 			</config-file>
 		
+			<resource-file src="res/xml/authenticator.xml" target="res/xml/authenticator.xml" />
+			
 			<source-file src="src/android/Constants.java" target-dir="src/at/kju/datacollector" />
 			<source-file src="src/android/DCSync.java" target-dir="src/at/kju/datacollector" />
 			<source-file src="src/android/authenticator/AuthenticationService.java" target-dir="src/at/kju/datacollector/authenticator" />

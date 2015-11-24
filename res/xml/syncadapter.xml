@@ -1,0 +1,2 @@
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:contentAuthority="at.kju.datacollector" android:accountType="at.kju.datacollector"  android:supportsUploading="true"/>
