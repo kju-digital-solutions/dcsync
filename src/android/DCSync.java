@@ -156,11 +156,15 @@ public class DCSync extends CordovaPlugin {
                 public void run() {
                     try {
                         final DCDocument dcd = lssm.getData(cid);
+                        if( dcd != null) {
+                            callbackContext.error("Document not found");
+                            return;
+                        }
                         dcd.setDeleted(true);
                         ArrayList list = new ArrayList<DCDocument>();
                         list.add(dcd);
                         lssm.saveData(list, false,  null);
-                        callbackContext.success(lssm.getData(dcd.getCid()).toJSON());
+                        callbackContext.success();
                     } catch (Exception ex) {
                         callbackContext.error(ex.toString());
                     }
