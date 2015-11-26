@@ -23,6 +23,7 @@ import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import at.kju.datacollector.Constants;
 import at.kju.datacollector.client.NetworkUtilities;
@@ -150,7 +151,9 @@ class Authenticator extends AbstractAccountAuthenticator {
 		try {
 			syncSettings = new LocalStorageSyncManager(mContext).getSyncSettings();
 		}
-		catch( Exception ex) {}
+		catch( Exception ex) {
+			Log.w("DC-AUTHENTICATOR", ex);
+		}
 		return NetworkUtilities.authenticate(username, password, syncSettings, null/* Handler */, null/* Context */);
 	}
 

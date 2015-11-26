@@ -34,7 +34,7 @@ public class SyncSettings {
 	}
 
 	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-512");
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] hash = digest.digest(password.getBytes("UTF-8"));
 		this.passwordHash = Base64.encodeToString(hash,Base64.DEFAULT);
 	}

@@ -48,7 +48,7 @@
 			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			
-				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="at.kju.datacollector" />
+				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="at.kju.datacollector" android:exported="true"/>
 				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="false">
 					<intent-filter>
 						<action android:name="android.accounts.AccountAuthenticator" />

@@ -235,10 +235,6 @@ public class DCSync extends CordovaPlugin {
             });
         }
         else if ("performSync".equals(action)) {
-
-            final JSONArray documentFilter = args.getJSONArray(0);
-            final JSONObject options = args.getJSONObject(1);
-
             cordova.getThreadPool().execute(new Runnable() {
                 public void run() {
                     try {
