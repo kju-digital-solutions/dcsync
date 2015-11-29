@@ -16,7 +16,7 @@
 			<merges target="cordova.plugins"/>
 		</js-module>
 		
-		   <!-- <platform name="ios">
+        <platform name="ios">
 				<config-file target="config.xml" parent="/*">
 					<feature name="DCSync">
 						<param name="ios-package" value="DCSync"/>
@@ -24,7 +24,7 @@
 				</config-file>
 				<header-file src="src/ios/DCSync.h" />
 				<source-file src="src/ios/DCSync.m" />
-			</platform>-->
+			</platform>
 		 <platform name="android">
 			<config-file target="res/xml/config.xml" parent="/*">
 				<feature name="DCSync" >
