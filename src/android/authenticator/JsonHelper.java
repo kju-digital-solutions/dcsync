@@ -2,6 +2,7 @@ package at.kju.datacollector.authenticator;
 
 import android.util.JsonReader;
 import android.util.JsonToken;
+import android.util.MalformedJsonException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,13 +29,9 @@ public class JsonHelper {
         JSONObject obj = new JSONObject();
         reader.beginObject();
         while (reader.hasNext()) {
-            JsonToken token = reader.peek();
-            if (token.equals(JsonToken.END_OBJECT)) {
-                reader.endObject();
-                return obj;
-            } else
-                handleNonArrayToken(reader, token, null, obj);
+            handleToken(reader, null, obj);
         }
+        reader.endObject();
         return obj;
     }
 
@@ -49,35 +46,33 @@ public class JsonHelper {
     {
         JSONArray arr = new JSONArray();
         reader.beginArray();
-        while (true) {
-            JsonToken token = reader.peek();
-            if (token.equals(JsonToken.END_ARRAY)) {
-                reader.endArray();
-                break;
-            } else if (token.equals(JsonToken.BEGIN_OBJECT)) {
-                arr.put(handleObject(reader));
-            } else if (token.equals(JsonToken.END_OBJECT)) {
-                reader.endObject();
-            } else
-                handleNonArrayToken(reader, token, arr, null);
+        while (reader.hasNext()) {
+            handleToken(reader, arr, null);
         }
+        reader.endArray();
         return arr;
     }
 
     /**
-     * Handle non array non object tokens
+     * Handle member tokens
      *
      * @param reader
-     * @param token
      * @throws IOException
      */
-    public static void handleNonArrayToken(JsonReader reader, JsonToken token, JSONArray arr, JSONObject obj) throws IOException, JSONException
+    public static void handleToken(JsonReader reader,  JSONArray arr, JSONObject obj) throws IOException, JSONException
     {
+        JsonToken token = reader.peek();
         String name = null;
-        if (token.equals(JsonToken.NAME))
+        if (token.equals(JsonToken.NAME)) {
             name = reader.nextName();
+            token = reader.peek();
+        }
 
-        token = reader.peek();
+        if( name == null && obj!=null)
+            throw new MalformedJsonException("property value without name");
+        if( name != null && obj==null)
+            throw new MalformedJsonException("property value with name in array");
+
         if (token.equals(JsonToken.STRING)) {
             if( arr != null)
                 arr.put(reader.nextString());
@@ -90,14 +85,33 @@ public class JsonHelper {
             else
                 obj.put(name, reader.nextLong());
         }
+        else if (token.equals(JsonToken.NULL)) {
+            reader.nextNull();
+            if( arr != null)
+                arr.put(null);
+            else
+                obj.put(name, null);
+        }
         else if (token.equals(JsonToken.BOOLEAN)) {
             if( arr != null)
                 arr.put(reader.nextBoolean());
             else
                 obj.put(name, reader.nextBoolean());
         }
+        else if (token.equals(JsonToken.BEGIN_ARRAY)) {
+            if( arr != null)
+                arr.put(handleArray(reader));
+            else
+                obj.put(name, handleArray(reader));
+        }
+        else if (token.equals(JsonToken.BEGIN_OBJECT)) {
+            if( arr != null)
+                arr.put(handleObject(reader));
+            else
+                obj.put(name, handleObject(reader));
+        }
         else
-            reader.skipValue();
+            throw new MalformedJsonException("cannot parse " + token.name());
     }
 }
 

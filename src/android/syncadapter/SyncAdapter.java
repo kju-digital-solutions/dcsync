@@ -80,7 +80,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
 
 			SyncSettings s = lssm.getSyncSettings();
-			while( NetworkUtilities.sync(account, authtoken, lssm.getAppVersionString(), lssm.getUpSyncDocs(), s, lssm.getFileStorageLocation(), p, lssm) );
+			NetworkUtilities.sync(account, authtoken, lssm.getAppVersionString(), lssm.getUpSyncDocs(), s, lssm.getFileStorageLocation(), p, lssm);
 			p.setCompleted();
 			return;
 

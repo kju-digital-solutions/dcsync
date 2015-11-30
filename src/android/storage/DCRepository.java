@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.RemoteException;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class DCRepository {
         }
     }
 
-    public List<DCDocument> searchDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
+    public List<DCDocument> searchDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException {
         ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
         List<DCDocument> retList = new ArrayList<DCDocument>();
         if( documentSearchmap == null)
@@ -94,10 +95,13 @@ public class DCRepository {
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);
                 boolean matches = true;
-                for( Pattern p : patterns) {
-                    if( ! p.matcher(fd.getDocument()).matches() ) {
-                        matches = false;
-                        break;
+                if( patterns.size()> 0) {
+                    String doc = fd.getDocument().toString();
+                    for (Pattern p : patterns) {
+                        if (!p.matcher(doc).matches()) {
+                            matches = false;
+                            break;
+                        }
                     }
                 }
                 if( !matches )
@@ -111,14 +115,15 @@ public class DCRepository {
                     break;
             }
             c.close();
-            return retList;
-        } finally
-        {
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } finally        {
             if( c!=null)
                 c.close();
             cp.release();
         }
-
+        return retList;
     }
 
     public List<DCDocument> countDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
@@ -149,10 +154,13 @@ public class DCRepository {
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);
                 boolean matches = true;
-                for( Pattern p : patterns) {
-                    if( ! p.matcher(fd.getDocument()).matches() ) {
-                        matches = false;
-                        break;
+                if( patterns.size()> 0) {
+                    String doc = fd.getDocument().toString();
+                    for( Pattern p : patterns) {
+                        if( ! p.matcher(doc).matches() ) {
+                            matches = false;
+                            break;
+                        }
                     }
                 }
                 if( !matches )
@@ -166,14 +174,15 @@ public class DCRepository {
                     break;
             }
             c.close();
-            return retList;
+        } catch (JSONException e) {
+            e.printStackTrace();
         } finally
         {
             if( c!=null)
                 c.close();
             cp.release();
         }
-
+        return retList;
     }
 
     public boolean setSetting(String field, String value) throws Exception {

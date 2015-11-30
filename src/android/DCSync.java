@@ -119,7 +119,7 @@ public class DCSync extends CordovaPlugin {
             final DCDocument dcd = new DCDocument();
             dcd.setCid(args.getString(0));
             dcd.setPath(args.getString(1));
-            dcd.setDocument(args.getJSONObject(2).toString());
+            dcd.setDocument(args.getJSONObject(2));
             dcd.setFiles(args.getJSONArray(3).join(";"));
             dcd.setLocal( args.getBoolean(4));
 

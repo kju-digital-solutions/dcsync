@@ -15,7 +15,7 @@ public class DCDocument {
 	private String  creatorUser;
 	private long serverModified;
 	private String modifiedUser;
-	private String document;
+	private JSONObject document;
 	private String files;
 	private String path;
 	private boolean deleted;
@@ -34,9 +34,7 @@ public class DCDocument {
 		return cid;
 	}
 
-	public String getCreatorUser() {
-		return creatorUser;
-	}
+	public String getCreatorUser() { return creatorUser == null ? "" : creatorDuid;}
 
 	public void setCreatorUser(String creatorUser) {
 		this.creatorUser = creatorUser;
@@ -55,7 +53,7 @@ public class DCDocument {
 	}
 
 	public String getCreatorDuid() {
-		return creatorDuid;
+		return creatorDuid == null ? "" : creatorDuid;
 	}
 
 	public void setCreatorDuid(String creatorDuid) {
@@ -63,7 +61,7 @@ public class DCDocument {
 	}
 
 	public String getModifiedDuid() {
-		return modifiedDuid;
+		return modifiedDuid== null ? "" : modifiedDuid;
 	}
 
 	public void setModifiedDuid(String modifiedDuid) {
@@ -87,20 +85,18 @@ public class DCDocument {
 	}
 
 	public String getModifiedUser() {
-		return modifiedUser;
+		return modifiedUser== null ? "" : modifiedUser;
 	}
 
 	public void setModifiedUser(String modifiedUser) {
 		this.modifiedUser = modifiedUser;
 	}
 
-	public String getDocument() {
+	public JSONObject getDocument() {
 		return document;
 	}
 
-	public void setDocument(String document) {
-		this.document = document;
-	}
+	public void setDocument(JSONObject document) {this.document = document; 	}
 
 	public String getFiles() {
 		return files;
@@ -134,7 +130,7 @@ public class DCDocument {
 		this.syncNoMedia = syncNoMedia;
 	}
 
-	public DCDocument(String cid, String creatorDuid, String modifiedDuid, long creationDate, long modifiedDate, long serverModified, String creatordUser, String modifiedUser, String document, String files, String path, boolean deleted, boolean syncNoMedia, boolean local) {
+	public DCDocument(String cid, String creatorDuid, String modifiedDuid, long creationDate, long modifiedDate, long serverModified, String creatordUser, String modifiedUser, String document, String files, String path, boolean deleted, boolean syncNoMedia, boolean local) throws JSONException {
 		this.cid = cid;
 		this.creationDate = creationDate;
 		this.creatorDuid = creatorDuid;
@@ -143,7 +139,7 @@ public class DCDocument {
 		this.serverModified = serverModified;
 		this.modifiedUser = modifiedUser;
 		this.creatorUser= creatorUser;
-		this.document = document;
+		this.document = new JSONObject(document);
 		this.files = files;
 		this.path = path;
 		this.deleted = deleted;
@@ -163,7 +159,7 @@ public class DCDocument {
 					json.optLong("server_modified"),
 					json.optString("creator_user"),
 					json.optString("modified_user"),
-					json.optString("document"),
+					json.optJSONObject("document").toString(),
 					json.optString("files"),
 					json.optString("path"),
 					json.optBoolean("deleted", false),

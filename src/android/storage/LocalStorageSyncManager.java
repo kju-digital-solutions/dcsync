@@ -122,7 +122,7 @@ public class LocalStorageSyncManager {
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false);
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
-				ContentResolver.addPeriodicSync(account,  Constants.CONTENT_AUTHORITY, params, interval/60 );
+				ContentResolver.addPeriodicSync(account,  Constants.CONTENT_AUTHORITY, params, interval*60 );
 			}
 		}
 	}
@@ -203,7 +203,7 @@ public class LocalStorageSyncManager {
 
 			for( DCDocument fd:fdlist) {
 				ContentValues cv = new ContentValues();
-				cv.put(DCDataHelper.DOCUMENT, fd.getDocument());
+				cv.put(DCDataHelper.DOCUMENT, fd.getDocument().toString());
 				cv.put(DCDataHelper.PATH, fd.getPath());
 				cv.put(DCDataHelper.LOCAL, fd.isLocal() ? 1 : 0);
 				cv.put(DCDataHelper.FILES, fd.getFiles());

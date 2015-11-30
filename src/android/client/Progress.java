@@ -66,14 +66,14 @@ public class Progress {
     }
 
     public void setPercent(int percent) {
-        int oldperc = percent;
+        int oldperc = this.percent;
         if(percent== -1) {
-            this.percent = (recordsmax + filesmax ) > 0 ? ((recordsdone +  filesdone)/ (filesmax + recordsmax)) : 0;
+            this.percent = (recordsmax + filesmax ) > 0 ? ((recordsdone +  filesdone)*100/ (filesmax + recordsmax)) : 0;
         }
         else {
             this.percent = percent;
         }
-        if( oldperc != percent)
+        if( oldperc != this.percent)
             notifyProgress();
     }
 
@@ -85,7 +85,7 @@ public class Progress {
     private void notifyProgress() {
         JSONObject obj = this.toJSON();
         try {
-            obj.put("eventType", "onSyncProgress");
+            obj.put("eventType", "sync_progress");
         }
         catch( JSONException ex) {
         }
@@ -122,7 +122,7 @@ public class Progress {
     public void setFailed(Exception e) {
         JSONObject obj = this.toJSON();
         try {
-            obj.put("eventType", "onSyncFailed");
+            obj.put("eventType", "sync_failed");
             obj.put("exception", e.toString());
         }
         catch( JSONException ex) {
@@ -134,7 +134,7 @@ public class Progress {
     public void setCompleted() {
         JSONObject obj = new JSONObject();
         try {
-            obj.put("eventType", "onSyncCompleted");
+            obj.put("eventType", "sync_completed");
         }
         catch( JSONException ex) {
         }

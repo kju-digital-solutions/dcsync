@@ -30,34 +30,35 @@ public class MultipartUtility {
     private long currentTimeMillis() {
         return new Date().getTime()- r.nextInt();
     }
-    public void prepareConnection() {
+    public void prepareConnection() throws IOException {
         start = currentTimeMillis();
 
         boundary = "---------------------------" + currentTimeMillis();
 
-        connection.setRequestProperty("Content-Type","multipart/form-data; boundary=" + boundary);
+        connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+        connection.setChunkedStreamingMode(16384);
         connection.setUseCaches(false);
         connection.setDoInput(true);
         connection.setDoOutput(true);
-
+        outputStream = connection.getOutputStream();
+        writer = new PrintWriter(outputStream);
     }
 
     public void addFormField(final String name, final String value) {
         writer.append("--").append(boundary).append(CRLF)
                 .append("Content-Disposition: form-data; name=\"").append(name)
                 .append("\"").append(CRLF)
-                .append("Content-Type: text/plain; charset=").append(CHARSET)
+                .append("Content-Type: text/plain; charset=").append(CHARSET).append(CRLF)
+                .append("Content-Transfer-Encoding: 8bit")
                 .append(CRLF).append(CRLF).append(value).append(CRLF);
     }
 
-    public void addFilePart(final String fieldName, final File uploadFile, String mimeType)
-            throws IOException {
+    public void addFilePart(final String fieldName, final File uploadFile, String mimeType) throws IOException {
         final String fileName = uploadFile.getName();
         writer.append("--").append(boundary).append(CRLF)
                 .append("Content-Disposition: form-data; name=\"")
-                .append(fieldName).append("\"; filename=\"").append(fileName)
-                .append("\"").append(CRLF).append("Content-Type: ")
-                .append(mimeType).append(CRLF)
+                .append(fieldName).append("\"; filename=\"").append(fileName).append("\"").append(CRLF)
+                .append("Content-Type: ").append(mimeType).append(CRLF)
                 .append("Content-Transfer-Encoding: binary").append(CRLF)
                 .append(CRLF);
 
