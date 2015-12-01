@@ -24,6 +24,47 @@
 				</config-file>
 				<header-file src="src/ios/DCSync.h" />
 				<source-file src="src/ios/DCSync.m" />
+
+				<header-file src="src/ios/HTTPManager.h" />
+		        <source-file src="src/ios/HTTPManager.m" />
+
+		        <header-file src="src/ios/DCSyncConst.h" />
+		        
+		        <header-file src="src/ios/TextResponseSerializer.h" />
+		        <source-file src="src/ios/TextResponseSerializer.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
+		        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
+		        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
+		        <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFNetworking.h" />
+
+		        <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
+		        <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
+		        <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
+		        <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
+		        <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
+		        <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
+
+		        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
+		        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
+
+		        <framework src="Security.framework" />
+		        <framework src="SystemConfiguration.framework" />
+
 			</platform>
 		 <platform name="android">
 			<config-file target="res/xml/config.xml" parent="/*">
