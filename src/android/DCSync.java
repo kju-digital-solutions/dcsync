@@ -15,10 +15,13 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.PluginResult;
+import org.apache.cordova.file.FileUtils;
+import org.apache.cordova.file.LocalFilesystemURL;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -93,11 +96,14 @@ public class DCSync extends CordovaPlugin {
             });
         }
         else if ("getContentRootUri".equals(action)) {
-            final String path = args.getString(0);
             cordova.getActivity().runOnUiThread(new Runnable() {
                 public void run() {
                     try {
-                        callbackContext.success(lssm.getFileStorageLocation());
+                        // Get the File plugin from the plugin manager
+                        FileUtils filePlugin = (FileUtils)webView.getPluginManager().getPlugin("File");
+
+                        LocalFilesystemURL url = filePlugin.filesystemURLforLocalPath(lssm.getFileStorageLocation());
+                        callbackContext.success(url.toString());
                     } catch (Exception ex) {
                         callbackContext.error(ex.toString());
                     }
