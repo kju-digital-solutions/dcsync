@@ -7,6 +7,8 @@
 		
 		    <!-- Third party libraries -->
   
+		<dependency id="cordova-plugin-file" version="^3.0.0" />
+		
 		<js-module name="Q" src="www/lib/q.min.js">
 			<runs/>
 		</js-module>
