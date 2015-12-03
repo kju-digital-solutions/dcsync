@@ -2,6 +2,7 @@ package at.kju.datacollector.client;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -182,7 +183,7 @@ public class DCDocument {
 		ob.put("creator_user", getCreatorUser());
 		ob.put("modified_user", getModifiedUser());
 		ob.put("document", getDocument());
-		ob.put("files", getFiles());
+		ob.put("files", new JSONArray(getFiles()));
 		ob.put("path", getPath());
 		ob.put("deleted",isDeleted());
 		ob.put("sync_nomedia", isSyncNoMedia());

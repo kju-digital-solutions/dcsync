@@ -20,7 +20,6 @@ import android.accounts.Account;
 import android.content.Context;
 import android.os.Handler;
 import android.util.JsonReader;
-import android.util.JsonToken;
 import android.util.Log;
 
 import org.apache.http.ParseException;
@@ -31,7 +30,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,14 +38,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import at.kju.datacollector.authenticator.JsonHelper;
 import at.kju.datacollector.storage.LocalStorageSyncManager;
@@ -279,7 +274,7 @@ public class NetworkUtilities {
 							if (ze.isDirectory()) {
 								new File(fileRoot + filename).mkdirs();
 							} else if (ze.getName().toLowerCase().startsWith("files")) {
-								File f = new File(fileRoot + "/"  + filename);
+								File f = new File(fileRoot + "/"  + filename.substring(6).replace('\\','/'));
 								f.getParentFile().mkdirs();
 								FileOutputStream foss = new FileOutputStream (f, false);
 								int count;
