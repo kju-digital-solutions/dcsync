@@ -21,9 +21,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -201,6 +199,18 @@ public class DCSync extends CordovaPlugin {
                             s.setEventFilter(options.getJSONObject("event_filter"));
                         lssm.setSyncSettings(s);
                         callbackContext.success();
+                    } catch (Exception ex) {
+                        callbackContext.error(ex.toString());
+                    }
+                }
+            });
+        }
+        else if ("getSyncOptions".equals(action)) {
+            cordova.getThreadPool().execute(new Runnable() {
+                public void run() {
+                    try {
+                        SyncSettings s = lssm.getSyncSettings();
+                        callbackContext.success(s.toJSON());
                     } catch (Exception ex) {
                         callbackContext.error(ex.toString());
                     }

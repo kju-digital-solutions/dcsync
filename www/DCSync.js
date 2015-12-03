@@ -160,6 +160,7 @@ calls resultCallback with <string> of a file url to the Synced File root folder 
 DCSync.prototype.getContentRootUri = function() {
 	return this._promisedExec('getContentRootUri', []);
 }
+
 /*
 returns a new unique (random) Content Id (cid) in the following format:
 E621E1F8-C36C-495A-93FC-0C247A3E6E5F
@@ -192,6 +193,12 @@ DCSync.prototype.performSync = function() {
 */
 DCSync.prototype.setSyncOptions = function( options ) {
 	return this._promisedExec('setSyncOptions', [options]);
+}
+/*
+calls resultCallback with <object> of the last stored sync settings
+*/
+DCSync.prototype.getSyncOptions = function() {
+	return this._promisedExec('getSyncOptions', []);
 }
 /*
 retrieves list of documents for a given path with filter options

@@ -49,7 +49,7 @@ public class DCRepository {
             cp.release();
         }
     }
-    public void setSyncSettings(SyncSettings settings) throws RemoteException {
+    public void setSyncSettings(SyncSettings settings) throws Exception {
         ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
         Cursor c = null;
         try {
@@ -59,7 +59,8 @@ public class DCRepository {
 
             ContentValues cv = new ContentValues();
             cv.put(DCDataHelper.JSONDATA, settings.toJSON().toString());
-            cp.update(DCContentProvider.SETTINGS_URI, cv, null, null);
+            int i = cp.update(DCContentProvider.SETTINGS_URI, cv, null, null);
+            if( i == 0) throw new Exception( "not found");
         } finally {
             if( c!= null)
                 c.close();
