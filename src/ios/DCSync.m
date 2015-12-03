@@ -12,9 +12,25 @@
 
 #import "TextResponseSerializer.h"
 #import "HttpManager.h"
+#import "DCSyncConst.h"
+
 
 @implementation DCSync {
     AFHTTPRequestSerializer *requestSerializer;
+}
+
+/*
+success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
+failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
+*/
+- (void)authenticate:(NSString *) user
+                pass:(NSString *) pass
+                hash:(NSString *) hash
+             success:(void (^)(id responseObject))success
+             failure:(void (^)(NSError *error))failure {
+    
+    NSMutableDictionary *param = [NSMutableDictionary dictionary];
+    
 }
 
 
@@ -30,11 +46,13 @@
 
 
 
-- (void)post:(CDVInvokedUrlCommand*)command {
+- (void)post:(NSString *)url
+  parameters:(NSDictionary *)parameters
+     headers:(NSDictionary *) headers
+     success:(void (^)(id responseObject))success
+     failure:(void (^)(NSError *error))failure {
+    
     HttpManager *manager = [HttpManager sharedClient];
-    NSString *url = [command.arguments objectAtIndex:0];
-    NSDictionary *parameters = [command.arguments objectAtIndex:1];
-    NSDictionary *headers = [command.arguments objectAtIndex:2];
     [self setRequestHeaders: headers];
     
     manager.responseSerializer = [TextResponseSerializer serializer];
