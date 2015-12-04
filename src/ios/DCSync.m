@@ -11,25 +11,54 @@
 #import "dcsync.h"
 
 #import "TextResponseSerializer.h"
+#import "AFURLRequestSerialization.h"
 #import "HttpManager.h"
 #import "DCSyncConst.h"
 
 
 @implementation DCSync {
     AFHTTPRequestSerializer *requestSerializer;
+    
+    /*
+     Accss token for calling sync operation back-end. That comes from authenticate calling...
+     */
+    NSString * accessToken;
 }
 
-/*
-success:(void (^)(AFHTTPRequestOperation *operation, id responseObject))success
-failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
-*/
-- (void)authenticate:(NSString *) user
-                pass:(NSString *) pass
-                hash:(NSString *) hash
-             success:(void (^)(id responseObject))success
-             failure:(void (^)(NSError *error))failure {
+
+- (void)pluginInitialize
+{
+    [super pluginInitialize];
     
-    NSMutableDictionary *param = [NSMutableDictionary dictionary];
+    if (!accessToken)
+    {
+        [self authenticate];
+    }
+    
+}
+
+
+- (void)authenticate {
+    
+    NSDictionary *param = @{@"u": DCSYNC_TESTER, @"p": DCSYNC_PASSWORD, @"d": DCSYNC_HASH };
+    
+    [self post:[NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_AUTH]
+    parameters:param
+       headers:@{}
+       success:^(id responseObject){
+           NSError * jsonError;
+           
+           NSData *objectData = [responseObject dataUsingEncoding:NSUTF8StringEncoding];
+           NSDictionary *jsonResponse = [NSJSONSerialization JSONObjectWithData:objectData
+                                                                        options:NSJSONReadingMutableContainers
+                                                                          error:&jsonError];
+           
+           accessToken = [jsonResponse objectForKey:@"access_token"];
+       }
+       failure:^(NSError *error){
+           NSLog(@"%@",[error localizedDescription]);
+       }
+     ];
     
 }
 
@@ -57,13 +86,16 @@ failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
     
     manager.responseSerializer = [TextResponseSerializer serializer];
     [manager POST:url parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
-        [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
-        [dictionary setObject:responseObject forKey:@"data"];
+        //NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+        //[dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
+        //[dictionary setObject:responseObject forKey:@"data"];
         
         
         //CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:dictionary];
         //[weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+        success(responseObject);
+        
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
         [dictionary setObject:[NSNumber numberWithInt:operation.response.statusCode] forKey:@"status"];
@@ -72,6 +104,8 @@ failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
         
         //CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:dictionary];
         //[weakSelf.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        
+        failure(error);
     }];
 }
 
@@ -85,7 +119,18 @@ failure:(void (^)(AFHTTPRequestOperation *operation, NSError *error))failure
  ##################################################################################################*/
 - (void)getLastSync:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1", @"sync_timestamp": @"", @"upload_only": @"ß", @"upload_documents":@{} };
     
+    [self post:[NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC]
+    parameters:param
+       headers:@{@"content-type": @"application/zip"}
+       success:^(id responseObject){
+           //accessToken = [(NSDictionary *)responseObject objectForKey:@"access_token"];
+       }
+       failure:^(NSError *error){
+           NSLog(@"%@",[error localizedDescription]);
+       }
+     ];
 }
 
 
