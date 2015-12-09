@@ -46,8 +46,10 @@ public class DCSync extends CordovaPlugin {
     public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
         if ("registerCallback".equals(action)) {
             if (this.callbackContext != null) {
-                callbackContext.error("already bound");
-                return true;
+                //discard context
+                PluginResult r = new PluginResult(PluginResult.Status.NO_RESULT);
+                r.setKeepCallback(false);
+                this.callbackContext.sendPluginResult(r);
             }
             this.callbackContext = callbackContext;
 

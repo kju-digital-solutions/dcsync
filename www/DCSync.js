@@ -37,7 +37,9 @@ var Q = require('at.kju.datacollector.dcsync.Q');
 			'sync_completed': [],
 			'sync_failed': [],
 			'sync_progress': []
-			}
+			};
+	this._callbackRegistered = false;
+	
  }
  
 /**
@@ -56,7 +58,11 @@ DCSync.prototype.on = function(eventName, callback) {
     if (this._handlers.hasOwnProperty(eventName)) {
         this._handlers[eventName].push(callback);
     }
-	this._registerCallback();
+	if( ! this._callbackRegistered ){
+		this._callbackRegistered = true;
+		this._registerCallback();
+	}
+		
 };
 
 /**
@@ -203,8 +209,8 @@ DCSync.prototype.getSyncOptions = function() {
 /*
 retrieves list of documents for a given path with filter options
 */
-DCSync.prototype.searchDocuments = function(path, options) {
-	return this._promisedExec('searchDocuments', [path, options]);
+DCSync.prototype.searchDocuments = function(filter, options) {
+	return this._promisedExec('searchDocuments', [filter, options]);
 }
 /*
 */

@@ -209,14 +209,13 @@ public class NetworkUtilities {
 
 	public static boolean sync(Account account, String authtoken, String appVersion, List<DCDocument> fd, SyncSettings s, String fileRoot, Progress p, LocalStorageSyncManager lssm) {
 		boolean moreToCome = true;
-		String syncTS = null;
+		String syncTS = s.getLastSyncTimestamp();
 		int nFilesDone = 0;
 		int nRecordsDone = 0;
 		HttpURLConnection urlconn = null;
 		try {
 
 			URL Url = new URL(s.getUrl() + (s.getUrl().endsWith("/") ? "" : "/") + SYNC_URL_SUFFIX);
-
 			while(moreToCome) {
 				moreToCome = false;
 				urlconn = (HttpURLConnection) Url.openConnection();
@@ -231,7 +230,7 @@ public class NetworkUtilities {
 				mphelper.addFormField("locale", s.getLocale());
 				mphelper.addFormField("params", (s.getParams() == null) ? null : s.getParams().toString());
 				mphelper.addFormField("upload_only", "0");
-				mphelper.addFormField("sync_timestamp", s.getLastSyncTimestamp());
+				mphelper.addFormField("sync_timestamp", syncTS);
 
 				JSONArray arr = new JSONArray();
 				for (DCDocument f : fd) {
@@ -281,6 +280,7 @@ public class NetworkUtilities {
 								while ((count = zis.read(buffer)) != -1) {
 									foss.write(buffer, 0, count);
 								}
+								p.setFilesdone(++nFilesDone);
 								ze.getTime();
 								foss.close();
 							} else if (filename.toLowerCase().endsWith("documents.json")) {
