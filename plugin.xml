@@ -30,6 +30,9 @@
 				<header-file src="src/ios/HTTPManager.h" />
 		        <source-file src="src/ios/HTTPManager.m" />
 
+		        <header-file src="src/ios/NetManager.h" />
+		        <source-file src="src/ios/NetManager.m" />
+
 		        <header-file src="src/ios/DCSyncConst.h" />
 		        
 		        <header-file src="src/ios/TextResponseSerializer.h" />

@@ -15,6 +15,11 @@
 #import "HttpManager.h"
 #import "DCSyncConst.h"
 
+#import "NetManager.h"
+
+@interface DCSync () <NetManagerDelegate>
+
+@end
 
 @implementation DCSync {
     AFHTTPRequestSerializer *requestSerializer;
@@ -29,6 +34,9 @@
 - (void)pluginInitialize
 {
     [super pluginInitialize];
+    
+    
+    [[NetManager sharedManager] setDelegate:self];
     
     if (!accessToken)
     {
@@ -119,20 +127,31 @@
  ##################################################################################################*/
 - (void)getLastSync:(CDVInvokedUrlCommand*)command
 {
-    NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1", @"sync_timestamp": @"", @"upload_only": @"ß", @"upload_documents":@{} };
+    NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1",
+                            @"sync_timestamp": @"",
+                            @"upload_only": @"ß",
+                            @"duid":@"",
+                            @"locale":@"",
+                            @"extra_params":@"",
+                            @"upload_documents":@[]};
     
-    [self post:[NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC]
-    parameters:param
-       headers:@{@"content-type": @"application/zip"}
-       success:^(id responseObject){
-           //accessToken = [(NSDictionary *)responseObject objectForKey:@"access_token"];
-       }
-       failure:^(NSError *error){
-           NSLog(@"%@",[error localizedDescription]);
-       }
-     ];
+    NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
+    NSURL *URL = [NSURL URLWithString:strURL];
+    
+    [[NetManager sharedManager] sendPOSTRequestTo:strURL postData:param];
 }
 
+
+#pragma mark - Net Manager Delegate
+-(void)requestDidFailWithError:(NSError *)error{
+    
+}
+-(void)requestDidFinish:(NSData *)result{
+    
+    [[NSFileManager defaultManager] createFileAtPath:NSTemporaryDirectory()
+                                            contents:result
+                                          attributes:nil];
+}
 
 
 
