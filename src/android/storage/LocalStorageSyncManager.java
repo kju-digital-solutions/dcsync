@@ -2,8 +2,6 @@ package at.kju.datacollector.storage;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -17,7 +15,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
-import android.util.Log;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -31,7 +28,6 @@ import at.kju.datacollector.Constants;
 import at.kju.datacollector.client.DCDocument;
 import at.kju.datacollector.client.Progress;
 import at.kju.datacollector.client.SyncSettings;
-import at.kju.datacollector.syncadapter.SyncAdapter;
 
 /**
  * @author Leo
@@ -206,7 +202,7 @@ public class LocalStorageSyncManager {
 				cv.put(DCDataHelper.DOCUMENT, fd.getDocument().toString());
 				cv.put(DCDataHelper.PATH, fd.getPath());
 				cv.put(DCDataHelper.LOCAL, fd.isLocal() ? 1 : 0);
-				cv.put(DCDataHelper.FILES, fd.getFiles());
+				cv.put(DCDataHelper.FILES, fd.getFiles().toString());
 				if( fromServer) {
 					cv.put(DCDataHelper.SERVER_MODIFIED, fd.getServerModified());
 				}

@@ -17,7 +17,7 @@ public class DCDocument {
 	private long serverModified;
 	private String modifiedUser;
 	private JSONObject document;
-	private String files;
+	private JSONArray files;
 	private String path;
 	private boolean deleted;
 	private boolean syncNoMedia;
@@ -99,11 +99,11 @@ public class DCDocument {
 
 	public void setDocument(JSONObject document) {this.document = document; 	}
 
-	public String getFiles() {
+	public JSONArray getFiles() {
 		return files;
 	}
 
-	public void setFiles(String files) {
+	public void setFiles(JSONArray files) {
 		this.files = files;
 	}
 
@@ -141,7 +141,7 @@ public class DCDocument {
 		this.modifiedUser = modifiedUser;
 		this.creatorUser= creatorUser;
 		this.document = new JSONObject(document);
-		this.files = files;
+		this.files = new JSONArray(files);
 		this.path = path;
 		this.deleted = deleted;
 		this.syncNoMedia = syncNoMedia;
@@ -161,7 +161,7 @@ public class DCDocument {
 					json.optString("creator_user"),
 					json.optString("modified_user"),
 					json.optJSONObject("document").toString(),
-					json.optString("files"),
+					json.optJSONArray("files").toString(),
 					json.optString("path"),
 					json.optBoolean("deleted", false),
 					json.optBoolean("sync_nomedia", false),
@@ -183,7 +183,7 @@ public class DCDocument {
 		ob.put("creator_user", getCreatorUser());
 		ob.put("modified_user", getModifiedUser());
 		ob.put("document", getDocument());
-		ob.put("files", new JSONArray(getFiles()));
+		ob.put("files", getFiles());
 		ob.put("path", getPath());
 		ob.put("deleted",isDeleted());
 		ob.put("sync_nomedia", isSyncNoMedia());

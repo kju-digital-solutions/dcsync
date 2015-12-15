@@ -1,6 +1,5 @@
 package at.kju.datacollector.client;
 
-import android.accounts.AuthenticatorException;
 import android.content.Context;
 
 import org.json.JSONException;
@@ -27,6 +26,7 @@ public class Progress {
 
     public void setFilesdone(int filesdone) {
         this.filesdone = filesdone;
+        filesmax = Math.max(filesdone, filesmax);
         setPercent(-1);
     }
 
@@ -37,6 +37,7 @@ public class Progress {
 
     public void setRecordsdone(int recordsdone) {
         this.recordsdone = recordsdone;
+        recordsmax = Math.max(recordsdone, recordsmax);
         setPercent(-1);
     }
 

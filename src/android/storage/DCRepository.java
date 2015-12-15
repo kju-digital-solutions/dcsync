@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import at.kju.datacollector.Constants;
@@ -85,7 +84,7 @@ public class DCRepository {
                 params.add(like);
                 where = where + " and document like ?";
                 if( !exactMatch) {
-                    patterns.add(Pattern.compile("^.*\"" + key + "\":\"[^\"]*" + Matcher.quoteReplacement(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
+                    patterns.add(Pattern.compile("^.*\"" +  Pattern.quote(key) + "\":\"[^\"]*" + Pattern.quote(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
                 }
             }
 
@@ -144,7 +143,7 @@ public class DCRepository {
                 params.add(like);
                 where = where + " and document like ?";
                 if( !exactMatch) {
-                    patterns.add(Pattern.compile("^.*\"" + key + "\":\"[^\"]*" + Matcher.quoteReplacement(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
+                    patterns.add(Pattern.compile("^.*\"" +  Pattern.quote(key) + "\":\"[^\"]*" +  Pattern.quote(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
                 }
             }
 

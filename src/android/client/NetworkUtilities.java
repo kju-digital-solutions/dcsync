@@ -235,11 +235,11 @@ public class NetworkUtilities {
 				JSONArray arr = new JSONArray();
 				for (DCDocument f : fd) {
 					arr.put(f.toJSON());
-					String[] files = new String[]{};
+					JSONArray files = new JSONArray();
 					if (f.getFiles() != null)
-						files = f.getFiles().split(",");
-					int i = 0;
-					for (String fil : files) {
+						files = f.getFiles();
+					for (int i = 0; i < files.length(); i++) {
+						String fil = files.getString(i);
 						if (fil.trim().length() == 0)
 							continue;
 						File filLoc = new File(fileRoot + "/" + fil.trim());
@@ -302,8 +302,10 @@ public class NetworkUtilities {
 								upsyncError = obj.optString("upsync_error");
 								syncTS = obj.optString("sync_timestamp");
 
-								p.setFilesmax(obj.optInt("files_total"));
-								p.setRecordsmax(obj.optInt("documents_total"));
+								if( p.getFilesmax() == 0 )
+									p.setFilesmax(obj.optInt("files_total"));
+								if( p.getRecordsmax() == 0)
+									p.setRecordsmax(obj.optInt("documents_total"));
 
 								moreToCome = !obj.optBoolean("sync_completed", false);
 								if ((upsyncError == null || upsyncError.isEmpty()) && fd.size() > 0) {

@@ -81,9 +81,9 @@ public class JsonHelper {
         }
         else if (token.equals(JsonToken.NUMBER)) {
             if( arr != null)
-                arr.put(reader.nextLong());
+                arr.put(reader.nextDouble());
             else
-                obj.put(name, reader.nextLong());
+                obj.put(name, reader.nextDouble());
         }
         else if (token.equals(JsonToken.NULL)) {
             reader.nextNull();
