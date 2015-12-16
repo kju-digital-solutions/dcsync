@@ -11,12 +11,10 @@ import android.content.OperationApplicationException;
 import android.content.PeriodicSync;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,25 +88,25 @@ public class LocalStorageSyncManager {
 	}
 	public void ensureAccount(SyncSettings settings) {
 		AccountManager am = AccountManager.get(mCtx);
-		Account[] accounts = am.getAccountsByType(Constants.ACCOUNT_TYPE);
+		Account[] accounts = am.getAccountsByType(Constants.getAccountType(mCtx));
 
 		if( accounts.length == 0) {
-			Account account = new Account(settings.getUsername(), Constants.ACCOUNT_TYPE);
+			Account account = new Account(settings.getUsername(), Constants.getAccountType(mCtx));
 			am.addAccountExplicitly(account, settings.getPasswordHash(), null);
-			ContentResolver.setIsSyncable(account, Constants.CONTENT_AUTHORITY, 1);
-			ContentResolver.setSyncAutomatically(account, Constants.CONTENT_AUTHORITY, true);
+			ContentResolver.setIsSyncable(account, Constants.getContentAuthority(mCtx), 1);
+			ContentResolver.setSyncAutomatically(account, Constants.getContentAuthority(mCtx), true);
 		}
 	}
 	public void syncIntervalChanged(SyncSettings settings) {
 
 		AccountManager am = AccountManager.get(mCtx);
-		Account[] accounts = am.getAccountsByType(Constants.ACCOUNT_TYPE);
+		Account[] accounts = am.getAccountsByType(Constants.getAccountType(mCtx));
 		Account account;
 
 		if (accounts.length != 0) {
 			account = accounts[0];
 
-			List<PeriodicSync> syncs = ContentResolver.getPeriodicSyncs(account, Constants.CONTENT_AUTHORITY);
+			List<PeriodicSync> syncs = ContentResolver.getPeriodicSyncs(account, Constants.getContentAuthority(mCtx));
 			for( PeriodicSync sync :syncs) {
 				ContentResolver.removePeriodicSync(account,sync.authority, sync.extras);
 			}
@@ -118,16 +116,9 @@ public class LocalStorageSyncManager {
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false);
 				params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
-				ContentResolver.addPeriodicSync(account,  Constants.CONTENT_AUTHORITY, params, interval*60 );
+				ContentResolver.addPeriodicSync(account,  Constants.getContentAuthority(mCtx), params, interval*60 );
 			}
 		}
-	}
-	public Uri  getCommonDir() {
-		File[] files =  new File(mCtx.getExternalFilesDir(null), Constants.COMMON_DIR).listFiles();
-		if( !checkStorage() || files == null || files.length == 0)
-			return Uri.parse(Constants.HTML_ROOT );
-		else 
-			return Uri.fromFile(new File(mCtx.getExternalFilesDir(null), Constants.COMMON_DIR + "/"));
 	}
 	public String getFileStorageLocation() {
 		if( checkStorage() )
@@ -143,13 +134,13 @@ public class LocalStorageSyncManager {
 	}
 
 	public void markAsSynced(List<DCDocument> docs) throws RemoteException, OperationApplicationException {
-		ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+		ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
 		ContentValues cv = new ContentValues();
 		cv.put(DCDataHelper.SYNC_STATE, DCDataHelper.SYNC_STATE_SYNCED);
 		ArrayList<ContentProviderOperation> updates = new ArrayList<ContentProviderOperation>();
 
 		for( DCDocument fd : docs) {
-			updates.add(ContentProviderOperation.newUpdate(DCContentProvider.DOCUMENTS_URI).withSelection(DCDataHelper.CID + "=?", new String[]{fd.getCid()}).withValues(cv).build());
+			updates.add(ContentProviderOperation.newUpdate(DCContentProvider._documentsUri).withSelection(DCDataHelper.CID + "=?", new String[]{fd.getCid()}).withValues(cv).build());
 		}
 		cp.applyBatch(updates);
 	}
@@ -160,7 +151,7 @@ public class LocalStorageSyncManager {
 		List<DCDocument> fdlist = new ArrayList<DCDocument>(); //copy list
 		fdlist.addAll(dcDocs);
 		int changes = 0;
-		ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+		ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
 		SyncSettings settings = repo.getSyncSettings();
 		HashMap<String, Integer> existing = new HashMap<String, Integer>();
 		ArrayList<ContentProviderOperation> todelete = new ArrayList<ContentProviderOperation>();
@@ -169,7 +160,7 @@ public class LocalStorageSyncManager {
 			ArrayList<String>  whereArgs = new ArrayList<String>(100);
 			for( int j = fdlist.size()-1; j >=0; j--) {
 				if( fdlist.get(j).isDeleted()) {
-					todelete.add( ContentProviderOperation.newDelete(DCContentProvider.DOCUMENTS_URI).withSelection(DCDataHelper.CID + "=?", new String[]{fdlist.get(j).getCid()}).build());
+					todelete.add( ContentProviderOperation.newDelete(DCContentProvider._documentsUri).withSelection(DCDataHelper.CID + "=?", new String[]{fdlist.get(j).getCid()}).build());
 					fdlist.remove(j);
 				}
 			}
@@ -182,7 +173,7 @@ public class LocalStorageSyncManager {
 				if( i % 100 == 0 || i == fdlist.size()-1) {
 					String[] args = new String[whereArgs.size()];
 					whereArgs.toArray(args);
-					c =cp.query(DCContentProvider.DOCUMENTS_URI, new String [] {DCDataHelper.CID}, where.substring(0,where.length()-1) + ")", args, null);
+					c =cp.query(DCContentProvider._documentsUri, new String [] {DCDataHelper.CID}, where.substring(0,where.length()-1) + ")", args, null);
 					for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 						existing.put(c.getString(0), 1);
 					}
@@ -221,7 +212,7 @@ public class LocalStorageSyncManager {
 				}
 				else {
 					cv.put(DCDataHelper.SYNC_STATE, (fromServer || fd.isLocal()) ? DCDataHelper.SYNC_STATE_SYNCED :  DCDataHelper.SYNC_STATE_MODIFIED  );
-					updates.add( ContentProviderOperation.newUpdate(DCContentProvider.DOCUMENTS_URI).withSelection(DCDataHelper.CID + "=?", new String[]{fd.getCid()}).withValues(cv).build());
+					updates.add( ContentProviderOperation.newUpdate(DCContentProvider._documentsUri).withSelection(DCDataHelper.CID + "=?", new String[]{fd.getCid()}).withValues(cv).build());
 				}
 				i++;
 				if( p!= null)
@@ -240,7 +231,7 @@ public class LocalStorageSyncManager {
 			//insert
 			if( insertValues.size() > 0) {
 				ContentValues[] iv = new ContentValues[insertValues.size()];
-				changes +=cp.bulkInsert(DCContentProvider.DOCUMENTS_URI, insertValues.toArray(iv));
+				changes +=cp.bulkInsert(DCContentProvider._documentsUri, insertValues.toArray(iv));
 			}
 		}
 		catch(Exception ex) {

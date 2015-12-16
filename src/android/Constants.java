@@ -17,22 +17,27 @@
 package at.kju.datacollector;
 
 
+import android.content.Context;
+
+import at.kju.dcbootstrap.R;
 
 public class Constants {
 
 	/**
 	 * Account type string.
 	 */
-	public static final String ACCOUNT_TYPE = "at.kju.datacollector";
+	public static String getAccountType(Context ctx) {
+		return (String) ctx.getResources().getText(R.string.aam_account_type);
+	}
 
-	public static final String AUTHTOKEN_TYPE = "at.kju.datacollector";
+	public static String getAuthTokenType(Context ctx) {
+		return (String) ctx.getResources().getText(R.string.aam_account_type);
+	}
 
-	public static final String CONTENT_AUTHORITY = "at.kju.datacollector";
+	public static String getContentAuthority(Context ctx) {
+		return (String) ctx.getResources().getText(R.string.aam_account_type);
+	}
 
-	public static final String SYNC_URL = "https://media.kju.at/DataCollector";
-	
-	public static final String HTML_ROOT = "file:///android_asset/common/";	
-
-	public static final String COMMON_DIR = "common";
+	public static String HTML_ROOT = "file:///android_asset/common/";
 
 }

@@ -29,10 +29,10 @@ public class DCRepository {
         mCtx = ctx;
     }
     public SyncSettings getSyncSettings() throws RemoteException, Exception{
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         Cursor c = null;
         try {
-            c = cp.query(DCContentProvider.SETTINGS_URI, new String[] { DCDataHelper.JSONDATA, DCDataHelper.DEVICE_UUID}, null, null, null);
+            c = cp.query(DCContentProvider._settingsUri, new String[] { DCDataHelper.JSONDATA, DCDataHelper.DEVICE_UUID}, null, null, null);
 
             if( ! c.moveToFirst())
                 throw new Exception( "No Settings found!");
@@ -49,16 +49,16 @@ public class DCRepository {
         }
     }
     public void setSyncSettings(SyncSettings settings) throws Exception {
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         Cursor c = null;
         try {
-            c = cp.query(DCContentProvider.SETTINGS_URI, new String[] {DCDataHelper.JSONDATA}, null, null, null);
+            c = cp.query(DCContentProvider._settingsUri, new String[] {DCDataHelper.JSONDATA}, null, null, null);
             if( ! c.moveToFirst())
                 throw new RuntimeException("No Settings present!");
 
             ContentValues cv = new ContentValues();
             cv.put(DCDataHelper.JSONDATA, settings.toJSON().toString());
-            int i = cp.update(DCContentProvider.SETTINGS_URI, cv, null, null);
+            int i = cp.update(DCContentProvider._settingsUri, cv, null, null);
             if( i == 0) throw new Exception( "not found");
         } finally {
             if( c!= null)
@@ -68,7 +68,7 @@ public class DCRepository {
     }
 
     public List<DCDocument> searchDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException {
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         List<DCDocument> retList = new ArrayList<DCDocument>();
         if( documentSearchmap == null)
             documentSearchmap = new HashMap<String, String>();
@@ -89,7 +89,7 @@ public class DCRepository {
             }
 
 
-            c = cp.query(DCContentProvider.DOCUMENTS_URI, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE, DCDataHelper.LOCAL},
+            c = cp.query(DCContentProvider._documentsUri, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE, DCDataHelper.LOCAL},
                     where , params.toArray(new String[params.size()]), null);
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -127,7 +127,7 @@ public class DCRepository {
     }
 
     public List<DCDocument> countDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         List<DCDocument> retList = new ArrayList<DCDocument>();
         if( documentSearchmap == null)
             documentSearchmap = new HashMap<String, String>();
@@ -148,7 +148,7 @@ public class DCRepository {
             }
 
 
-            c = cp.query(DCContentProvider.DOCUMENTS_URI, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE},
+            c = cp.query(DCContentProvider._documentsUri, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE},
                     where ,params.toArray(new String[params.size()]), null);
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
@@ -186,17 +186,17 @@ public class DCRepository {
     }
 
     public boolean setSetting(String field, String value) throws Exception {
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         Cursor c = null;
         try {
-            c = cp.query(DCContentProvider.SETTINGS_URI, new String[] {field}, null, null, null);
+            c = cp.query(DCContentProvider._settingsUri, new String[] {field}, null, null, null);
             if( ! c.moveToFirst())
                 throw new Exception("No Settings present!");
 
             if( ! c.getString(0).equals(value)) {
                 ContentValues cv = new ContentValues();
                 cv.put(field, value);
-                cp.update(DCContentProvider.SETTINGS_URI, cv, null, null);
+                cp.update(DCContentProvider._settingsUri, cv, null, null);
                 return true;
             }
             return false;
@@ -209,11 +209,11 @@ public class DCRepository {
 
 
     public String getSetting(String field) throws Exception{
-        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.CONTENT_AUTHORITY);
+        ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         Cursor c = null;
         try {
 
-            c = cp.query(DCContentProvider.SETTINGS_URI, new String[]{field}, null, null, null);
+            c = cp.query(DCContentProvider._settingsUri, new String[]{field}, null, null, null);
             if( ! c.moveToFirst())
                 throw new Exception( "GetSetting: no settings  present");
             return c.getString(0);

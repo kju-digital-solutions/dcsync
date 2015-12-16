@@ -30,9 +30,6 @@
 				<header-file src="src/ios/HTTPManager.h" />
 		        <source-file src="src/ios/HTTPManager.m" />
 
-		        <header-file src="src/ios/NetManager.h" />
-		        <source-file src="src/ios/NetManager.m" />
-
 		        <header-file src="src/ios/DCSyncConst.h" />
 		        
 		        <header-file src="src/ios/TextResponseSerializer.h" />
@@ -67,42 +64,6 @@
 		        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
 		        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
 
-
-<!--#######################################################################################################################
- Web service for http request in background mode
-####################################################################################################################### -->
-
-		        <header-file src="src/ios/Webservice/HttpConnnection/HttpClient.h" />
-		        <source-file src="src/ios/Webservice/HttpConnnection/HttpClient.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/HttpConnnection/Reachability.h" />
-		        <source-file src="src/ios/Webservice/HttpConnnection/Reachability.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/HttpConnnection/WebServiceClient.h" />
-		        <source-file src="src/ios/Webservice/HttpConnnection/WebServiceClient.m" />
-
-		        <header-file src="src/ios/Webservice/JSON/JSON.h" />
-
-		        <header-file src="src/ios/Webservice/JSON/NSObject+SBJSON.h"  />
-		        <source-file src="src/ios/Webservice/JSON/NSObject+SBJSON.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/JSON/NSString+SBJSON.h" />
-		        <source-file src="src/ios/Webservice/JSON/NSString+SBJSON.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/JSON/SBJSON.h" />
-		        <source-file src="src/ios/Webservice/JSON/SBJSON.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/JSON/SBJsonBase.h" />
-		        <source-file src="src/ios/Webservice/JSON/SBJsonBase.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/JSON/SBJsonParser.h" />
-		        <source-file src="src/ios/Webservice/JSON/SBJsonParser.m" compiler-flags="-fno-objc-arc" />
-
-		        <header-file src="src/ios/Webservice/JSON/SBJsonWriter.h" />
-		        <source-file src="src/ios/Webservice/JSON/SBJsonWriter.m" compiler-flags="-fno-objc-arc" />
-
-<!--##########################################################################################################################-->
-
 		        <framework src="Security.framework" />
 		        <framework src="SystemConfiguration.framework" />
 
@@ -131,7 +92,7 @@
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 			
 				<provider android:name="at.kju.datacollector.storage.DCContentProvider"  android:authorities="at.kju.datacollector" android:exported="true"/>
-				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="false">
+				<service android:name="at.kju.datacollector.authenticator.AuthenticationService" android:exported="true">
 					<intent-filter>
 						<action android:name="android.accounts.AccountAuthenticator" />
 					</intent-filter>

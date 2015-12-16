@@ -21,14 +21,12 @@ import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
 import android.accounts.AccountManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
 import at.kju.datacollector.Constants;
 import at.kju.datacollector.client.NetworkUtilities;
 import at.kju.datacollector.client.SyncSettings;
-import at.kju.datacollector.storage.DCDataHelper;
 import at.kju.datacollector.storage.LocalStorageSyncManager;
 
 /**
@@ -91,7 +89,7 @@ class Authenticator extends AbstractAccountAuthenticator {
 	@Override
 	public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String authTokenType, Bundle loginOptions) {
 		final Bundle result = new Bundle();
-		if (!authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
+		if (!authTokenType.equals(Constants.getAuthTokenType(mContext))) {
 			result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType");
 			return result;
 		}
@@ -101,7 +99,7 @@ class Authenticator extends AbstractAccountAuthenticator {
 			final String accessToken= onlineConfirmPassword(account.name, password);
 			if (accessToken != null) {
 				result.putString(AccountManager.KEY_ACCOUNT_NAME, account.name);
-				result.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE);
+				result.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.getAccountType(mContext));
 				result.putString(AccountManager.KEY_AUTHTOKEN, accessToken);
 				return result;
 			}
@@ -125,7 +123,7 @@ class Authenticator extends AbstractAccountAuthenticator {
 	 */
 	@Override
 	public String getAuthTokenLabel(String authTokenType) {
-		if (authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
+		if (authTokenType.equals(Constants.getAuthTokenType(mContext))) {
 			return "tokenLabel";
 			//return mContext.getString(R.string.label);
 		}

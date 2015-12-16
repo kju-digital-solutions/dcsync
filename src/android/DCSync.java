@@ -127,7 +127,7 @@ public class DCSync extends CordovaPlugin {
             dcd.setPath(args.getString(1));
             dcd.setDocument(args.getJSONObject(2));
             dcd.setFiles(args.getJSONArray(3));
-            dcd.setLocal( args.getBoolean(4));
+            dcd.setLocal(args.getBoolean(4));
 
 
             cordova.getThreadPool().execute(new Runnable() {
@@ -257,15 +257,15 @@ public class DCSync extends CordovaPlugin {
                 public void run() {
                     try {
                         AccountManager am = AccountManager.get(webView.getContext());
-                        Account[] accounts = am.getAccountsByType(Constants.ACCOUNT_TYPE);
+                        Account[] accounts = am.getAccountsByType(Constants.getAccountType(webView.getContext()));
                         Account account = null;
                         if (accounts.length != 0) {
                             account = accounts[0];
                         }
                         Bundle b = new Bundle();
                         b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-                        am.invalidateAuthToken(Constants.ACCOUNT_TYPE, AccountManager.get(webView.getContext()).peekAuthToken(account, Constants.AUTHTOKEN_TYPE));
-                        ContentResolver.requestSync(account, Constants.CONTENT_AUTHORITY, b);
+                        am.invalidateAuthToken(Constants.getAccountType(webView.getContext()), AccountManager.get(webView.getContext()).peekAuthToken(account, Constants.getAuthTokenType(webView.getContext())));
+                        ContentResolver.requestSync(account, Constants.getContentAuthority(webView.getContext()), b);
 
                         callbackContext.success();
                     } catch (Exception ex) {

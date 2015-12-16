@@ -23,7 +23,6 @@ import android.accounts.OperationCanceledException;
 import android.content.AbstractThreadedSyncAdapter;
 import android.content.ContentProviderClient;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SyncResult;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -34,16 +33,12 @@ import org.apache.http.auth.AuthenticationException;
 import org.json.JSONException;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import at.kju.datacollector.Constants;
-import at.kju.datacollector.client.DCDocument;
 import at.kju.datacollector.client.NetworkUtilities;
 import at.kju.datacollector.client.Progress;
 import at.kju.datacollector.client.SyncSettings;
-import at.kju.datacollector.storage.DCDataHelper;
 import at.kju.datacollector.storage.LocalStorageSyncManager;
 
 /**
@@ -76,7 +71,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 		try {
 
 			// use the account manager to request the credentials
-			authtoken = mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE, true /* notifyAuthFailure */);
+			authtoken = mAccountManager.blockingGetAuthToken(account, Constants.getAuthTokenType(mContext), true /* notifyAuthFailure */);
 
 
 			SyncSettings s = lssm.getSyncSettings();
@@ -96,7 +91,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 			syncResult.stats.numIoExceptions++;
 			p.setFailed(e);
 		} catch (final AuthenticationException e) {
-			mAccountManager.invalidateAuthToken(Constants.ACCOUNT_TYPE, authtoken);
+			mAccountManager.invalidateAuthToken(Constants.getAccountType(mContext), authtoken);
 			syncResult.stats.numAuthExceptions++;
 			Log.e(TAG, "AuthenticationException", e);
 			p.setFailed(e);
