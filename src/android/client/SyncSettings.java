@@ -16,6 +16,7 @@ public class SyncSettings {
 	private String username;
 	private String passwordHash;
 	private String locale;
+	private boolean filesChanged;
 
 	public String getUsername() {
 		return username;
@@ -66,6 +67,7 @@ public class SyncSettings {
 		this.interval = obj.optLong("interval");
 		this.username = obj.optString("username");
 		this.passwordHash = obj.optString("password_hash");
+		this.filesChanged = obj.optBoolean("filesChanged",true);
 		if( obj.has("password")) {
 			this.setPassword(obj.optString("password", ""));
 		}
@@ -85,6 +87,7 @@ public class SyncSettings {
 			obj.put("params", getParams() );
 			obj.put("interval", getInterval() );
 			obj.put("username", getUsername() );
+			obj.put("filesChanged", isFilesChanged());
 			obj.put("password_hash", getPasswordHash() );
 		}
 		catch (Exception ex) {
@@ -154,5 +157,13 @@ public class SyncSettings {
 
 	public void setInterval(long interval) {
 		this.interval = interval;
+	}
+
+	public boolean isFilesChanged() {
+		return filesChanged;
+	}
+
+	public void setFilesChanged(boolean filesChanged) {
+		this.filesChanged = filesChanged;
 	}
 }

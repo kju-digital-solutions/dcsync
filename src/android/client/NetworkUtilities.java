@@ -213,6 +213,7 @@ public class NetworkUtilities {
 		int nFilesDone = 0;
 		int nRecordsDone = 0;
 		HttpURLConnection urlconn = null;
+		boolean filesChanged = false;
 		try {
 
 			URL Url = new URL(s.getUrl() + (s.getUrl().endsWith("/") ? "" : "/") + SYNC_URL_SUFFIX);
@@ -273,6 +274,7 @@ public class NetworkUtilities {
 							if (ze.isDirectory()) {
 								new File(fileRoot + filename).mkdirs();
 							} else if (ze.getName().toLowerCase().startsWith("files")) {
+								filesChanged = true;
 								File f = new File(fileRoot + "/"  + filename.substring(6).replace('\\','/'));
 								f.getParentFile().mkdirs();
 								FileOutputStream foss = new FileOutputStream (f, false);
@@ -329,6 +331,7 @@ public class NetworkUtilities {
 			}
 			s.setLastSyncTimestamp(syncTS);
 			s.setLastSyncDate(new Date(lssm.getUTCDate()));
+			s.setFilesChanged(filesChanged);
 			lssm.setSyncSettings(s);
 		} catch (Exception ex2) {
 			throw new RuntimeException(ex2);
