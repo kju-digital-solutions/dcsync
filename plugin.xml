@@ -39,7 +39,7 @@
 		        <header-file src="src/ios/DCSyncConst.h" />
 
 		        <header-file src="src/ios/ZipArchive/ZipArchive.h" />
-		        <source-file src="src/ios/ZipArchive/ZipArchive.mm" />
+		        <source-file src="src/ios/ZipArchive/ZipArchive.mm" compiler-flags="-fno-objc-arc"/>
 
 		        <header-file src="src/ios/ZipArchive/minizip/crypt.h" />
 		        <header-file src="src/ios/ZipArchive/minizip/ioapi.h" />
@@ -51,6 +51,8 @@
 		        <source-file src="src/ios/ZipArchive/minizip/mztools.c" />
 		        <source-file src="src/ios/ZipArchive/minizip/unzip.c" />
 		        <source-file src="src/ios/ZipArchive/minizip/zip.c" />
+
+		        <framework src="libz.1.2.5.tbd" />
 
 		        <framework src="Security.framework" />
 		        <framework src="SystemConfiguration.framework" />
