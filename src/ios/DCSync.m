@@ -14,6 +14,7 @@
 #import "DCSyncConst.h"
 
 #import "filepool.h"
+#import "DocJSONObject.h"
 
 
 
@@ -43,7 +44,17 @@
     [super pluginInitialize];
     
 #ifdef ___DEBUG___
-    [[FilePool sharedPool] setRootPath:NSTemporaryDirectory()];
+    
+    
+    
+    [[FilePool sharedPool] setRootPath:@"/Volumes/Work/Hybrid/dcsync/temp"];
+    [[DocJSONObject sharedDocJSONObject] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"];
+    
+    
+    
+    
+    
+    
 #endif
     
     
@@ -219,7 +230,18 @@
     
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request
                                                     completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                                                        [[FilePool sharedPool] extractFromFile:location.path];
+                                                        NSString * strRoot = [[FilePool sharedPool] extractFromFile:location.path];
+                                                        
+                                                        if ([strRoot isEqualToString:@""]) {
+                                                            /*
+                                                             */
+                                                            
+                                                            
+                                                        }
+                                                        else {
+                                                            NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
+                                                            [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile];
+                                                        }
                                         }];
     
     // Start the task

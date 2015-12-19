@@ -35,9 +35,9 @@ static FilePool *pool = nil;
     [self extractFromFile:strFile];
 }
 
-- (void)extractFromFile:(NSString *)strFile {
+- (NSString *)extractFromFile:(NSString *)strFile {
     if (!self.rootPath) {
-        return;
+        return @"";
     }
     
     ZipArchive *zipArchive = [[ZipArchive alloc] init];
@@ -45,6 +45,11 @@ static FilePool *pool = nil;
     
     [zipArchive UnzipFileTo:self.rootPath overWrite:YES];
     [zipArchive UnzipCloseFile];
+    
+    /*
+        Return document.json path.
+    */
+    return self.rootPath;
 }
 
 @end

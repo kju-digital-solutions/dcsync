@@ -14,7 +14,7 @@
 + (id)sharedPool;
 
 - (void)extractFromData:(NSData *)data;
-- (void)extractFromFile:(NSString *)strFile;
+- (NSString *)extractFromFile:(NSString *)strFile;
 
 @property (nonatomic, retain) NSString *rootPath;
 

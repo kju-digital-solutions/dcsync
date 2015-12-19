@@ -16,10 +16,13 @@
 -(void)mergeDJSON:(NSMutableArray *) dJson;
 -(void)mergeDJSONFromFile:(NSString *) dJsonFile;
 
+-(void)saveDJSON;
+
 -(void)searchDocument:(NSString *) path;
 
 
-@property (nonatomic, retain) NSString *rootPath;
+@property (nonatomic, retain) NSString * outputPath;
+@property (nonatomic, retain) NSMutableArray *arrDocuments;
 
 @end
 
