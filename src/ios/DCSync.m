@@ -15,6 +15,10 @@
 
 #import "filepool.h"
 #import "DocJSONObject.h"
+#import "DataCollectorAPI.h"
+
+#import <CommonCrypto/CommonDigest.h>
+
 
 
 
@@ -42,6 +46,8 @@
 - (void)pluginInitialize
 {
     [super pluginInitialize];
+    
+    self.syncTimeStamp = @"";
     
 #ifdef ___DEBUG___
     
@@ -152,7 +158,16 @@
  ##################################################################################################*/
 - (void)newDocumentCid:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
     
+    CFUUIDRef uuidRef = CFUUIDCreate(NULL);
+    CFStringRef uuidStringRef = CFUUIDCreateString(NULL, uuidRef);
+    CFRelease(uuidRef);
+    NSString * cid = (__bridge_transfer NSString *)uuidStringRef;
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:cid];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -202,50 +217,52 @@
         return;
     
     NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1",
-                            @"sync_timestamp": @"",
+                            @"sync_timestamp": self.syncTimeStamp,
                             @"upload_only": @"ß",
                             @"duid":@"",
                             @"locale":@"",
                             @"extra_params":@"",
                             @"upload_documents":@[]};
-    
-    NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
-    NSURL *URL = [NSURL URLWithString:strURL];
-    
-    NSError *error;
-    
-    NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
-    NSURLSession *session = [NSURLSession sessionWithConfiguration:configuration delegate:nil delegateQueue:nil];
-    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL
-                                                           cachePolicy:NSURLRequestUseProtocolCachePolicy
-                                                       timeoutInterval:60.0];
-    
-    
-    [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
-    
-    [request setHTTPMethod:@"POST"];
-    NSData *postData = [NSJSONSerialization dataWithJSONObject:param options:0 error:&error];
-    [request setHTTPBody:postData];
-    
-    NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request
-                                                    completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                                                        NSString * strRoot = [[FilePool sharedPool] extractFromFile:location.path];
-                                                        
-                                                        if ([strRoot isEqualToString:@""]) {
-                                                            /*
-                                                             */
-                                                            
-                                                            
-                                                        }
-                                                        else {
-                                                            NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
-                                                            [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile];
-                                                        }
-                                        }];
-    
-    // Start the task
-    [task resume];
+                                        
+    [[DataCollectorAPI sharedAPI] sync:param completion:^(NSString *filePath) {
+                                NSString * strRoot = [[FilePool sharedPool] extractFromFile:filePath];
+                                
+                                if ([strRoot isEqualToString:@""]) {
+                                    /*
+                                     
+                                     */
+                                }
+                                else {
+                                    NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
+                                    [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile];
+                                    
+                                    NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
+                                    NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+                                    
+                                    self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
+                                    
+                                    BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
+                                    
+                                    if (completed) {
+                                        /*
+                                         sync_completed....
+                                         */
+                                        
+                                        
+                                    }
+                                    else {
+                                        /*
+                                         Continue to sync...
+                                         We should trigger sync event here....
+                                         sync_progress
+                                         */
+                                        
+                                        
+                                        [self performSync:nil];
+                                    }
+                                    
+                                }
+                            }];
 }
 
 
@@ -273,7 +290,23 @@
  ##################################################################################################*/
 - (void)searchDocuments:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
     
+    NSDictionary *paramQuery = [command.arguments objectAtIndex:0];
+    NSDictionary *paramOption = [command.arguments objectAtIndex:1];
+    
+    NSError* __autoreleasing error = nil;
+    CDVPluginResult* result = nil;
+    NSString* message = nil;
+    
+    [[DocJSONObject sharedDocJSONObject] searchDocument:paramQuery
+                                                 option:paramOption
+                                               callback:^(NSArray *arrDCDocuments){
+        
+    }];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 @end

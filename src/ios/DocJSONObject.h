@@ -18,7 +18,9 @@
 
 -(void)saveDJSON;
 
--(void)searchDocument:(NSString *) path;
+-(void)searchDocument:(NSDictionary *) query
+               option:(NSDictionary *) option
+             callback:(void (^)(NSArray * arrDCDocuments))callback;
 
 
 @property (nonatomic, retain) NSString * outputPath;

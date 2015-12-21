@@ -39,8 +39,19 @@ static DocJSONObject *dJsonObj = nil;
 }
 
 
--(void)searchDocument:(NSString *) path {
-
+-(void)searchDocument:(NSDictionary *) query
+               option:(NSDictionary *) option
+             callback:(void (^)(NSArray * arrDCDocuments))callback {
+    for (NSDictionary * file in self.arrDocuments) {
+        NSMutableArray * arrResult = [[NSMutableArray alloc] init];
+        
+        NSString * filePath = [[NSURL fileURLWithPath:[file valueForKey:@"path"]].path lowercaseString];
+        NSString * searchPath = [[NSURL fileURLWithPath:[option valueForKey:@"path"]].path lowercaseString];
+        
+        if (searchPath && [filePath rangeOfString:searchPath].location != NSNotFound) {
+            [arrResult addObject:file];
+        }
+    }
 }
 
 

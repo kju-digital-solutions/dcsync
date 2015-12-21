@@ -25,6 +25,12 @@
 }
 
 
+
+@property (nonatomic, retain) NSString *syncTimeStamp;
+
+
+
+
 /*##################################################################################################
  desc : calls resultCallback with <date> of last sync
  

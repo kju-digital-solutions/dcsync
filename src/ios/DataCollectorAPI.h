@@ -16,7 +16,8 @@
 -(void)authenticate:(NSString *) username
            password:(NSString *)password;
 
--(void)sync;
+-(void)sync:(NSDictionary *) param
+ completion:(void (^)(NSString * filePath))completion;
 
 
 @property (nonatomic, retain) NSString *rootPath;
