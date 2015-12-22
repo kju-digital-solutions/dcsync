@@ -30,6 +30,10 @@
 
 
 
+-(void)sync_progress:(int) progress;
+-(void)sync_completed:(NSURL *) downloadedFile;
+
+
 
 /*##################################################################################################
  desc : calls resultCallback with <date> of last sync

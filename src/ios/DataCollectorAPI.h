@@ -9,7 +9,9 @@
 #ifndef DataCollectorAPI_h
 #define DataCollectorAPI_h
 
-@interface DataCollectorAPI : NSObject
+#import "DCSync.h"
+
+@interface DataCollectorAPI : NSObject <NSURLSessionTaskDelegate>
 
 + (id)sharedAPI;
 
@@ -17,10 +19,11 @@
            password:(NSString *)password;
 
 -(void)sync:(NSDictionary *) param
- completion:(void (^)(NSString * filePath))completion;
+   listener:(DCSync *)listener;
 
 
 @property (nonatomic, retain) NSString *rootPath;
+@property (nonatomic, retain) DCSync * listener;
 
 @end
 

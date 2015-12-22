@@ -241,6 +241,7 @@ static DocJSONObject *dJsonObj = nil;
 }
 
 -(void)saveDJSON {
+    
     NSString * path  = [self.rootPath stringByAppendingPathComponent:@"docs.sync"];
     
     NSMutableDictionary * djson = [[NSMutableDictionary alloc] init];
@@ -251,10 +252,10 @@ static DocJSONObject *dJsonObj = nil;
     
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:djson options:NSJSONWritingPrettyPrinted error:nil];
     [jsonData writeToFile:path atomically:NO];
-    
 }
 
 -(void)loadDJSON {
+    
     NSMutableArray * arrDocuments = nil;
     NSMutableArray * arrUnsyncedDocuments = nil;
     NSMutableDictionary * syncInfo = nil;
@@ -281,6 +282,7 @@ static DocJSONObject *dJsonObj = nil;
 -(void)mergeDJSONFromFile:(NSString *) dJsonFile
                 completed:(BOOL) completed
 {
+    
     NSData *data = [NSData dataWithContentsOfFile:dJsonFile];
     NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
     

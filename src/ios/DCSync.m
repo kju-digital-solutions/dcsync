@@ -52,12 +52,12 @@
 #ifdef ___DEBUG___
     
     
-    if (![[FilePool sharedPool] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"]) {
+    if (![[FilePool sharedPool] setOutputPath:NSTemporaryDirectory()]) {
         //
         
     }
     
-    if (![[DocJSONObject sharedDocJSONObject] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"]) {
+    if (![[DocJSONObject sharedDocJSONObject] setOutputPath:NSTemporaryDirectory()]) {
         //
     }
     
@@ -252,6 +252,43 @@
 
 
 
+-(void)sync_progress:(int) progress {
+    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: %d});", progress];
+    [self.commandDelegate evalJs:jsString];
+}
+
+
+-(void)sync_completed:(NSURL *) downloadedFile {
+    NSString * strRoot = [[FilePool sharedPool] extractFromFile:downloadedFile.path];
+    
+    if ([strRoot isEqualToString:@""]) {
+        
+    }
+    else {
+        
+        NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
+        
+        
+        NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
+        NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+        
+        self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
+        BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
+        
+        [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile completed:completed];
+        
+        
+        if (completed) {
+            NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
+            [self.commandDelegate evalJs:jsString];
+            
+        }
+        else {
+            [self performSync:nil];
+        }
+        
+    }
+}
 
 
 /*##################################################################################################
@@ -262,9 +299,13 @@
  ##################################################################################################*/
 - (void)performSync:(CDVInvokedUrlCommand*)command
 {
+    
     // Check root path....
     if (![[FilePool sharedPool] rootPath])
         return;
+    
+    NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_progress');"];
+    [self.commandDelegate evalJs:jsString];
     
     NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1",
                             @"sync_timestamp": self.syncTimeStamp,
@@ -274,48 +315,7 @@
                             @"extra_params":@"",
                             @"upload_documents":@[]};
                                         
-    [[DataCollectorAPI sharedAPI] sync:param completion:^(NSString *filePath) {
-                                NSString * strRoot = [[FilePool sharedPool] extractFromFile:filePath];
-                                
-                                if ([strRoot isEqualToString:@""]) {
-                                    /*
-                                     
-                                     */
-                                }
-                                else {
-                                    
-                                    NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
-                                    
-                                    
-                                    NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
-                                    NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-                                    
-                                    self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
-                                    BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
-                                    
-                                    [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile completed:completed];
-                                    
-                                    
-                                    if (completed) {
-                                        /*
-                                         sync_completed....
-                                         */
-                                        
-                                        
-                                    }
-                                    else {
-                                        /*
-                                         Continue to sync...
-                                         We should trigger sync event here....
-                                         sync_progress
-                                         */
-                                        
-                                        
-                                        [self performSync:nil];
-                                    }
-                                    
-                                }
-                            }];
+    [[DataCollectorAPI sharedAPI] sync:param listener:self];
 }
 
 
