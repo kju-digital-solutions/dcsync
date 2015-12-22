@@ -9,8 +9,10 @@
 #ifndef DCSyncConst_h
 #define DCSyncConst_h
 
+#define CID_LENGTH          32
 
-#define DCSYNC_WSE_URL      @"https://ch-co2tieferlegen.preview.kju.at"
+
+#define DCSYNC_WSE_URL      @"http://ch-co2tieferlegen.preview.kju.at"
 
 
 

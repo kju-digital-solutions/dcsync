@@ -52,17 +52,6 @@ public class DCSync extends CordovaPlugin {
                 this.callbackContext.sendPluginResult(r);
             }
             this.callbackContext = callbackContext;
-
-            IntentFilter intentFilter = new IntentFilter(SyncService.UPDATE_INTENT);
-            if (this.receiver == null) {
-                this.receiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        sendCallback(intent, true);
-                    }
-                };
-                webView.getContext().registerReceiver(this.receiver, intentFilter);
-            }
         }
         else if ("getLastSync".equals(action)) {
             cordova.getThreadPool().execute(new Runnable() {
@@ -285,22 +274,61 @@ public class DCSync extends CordovaPlugin {
     }
 
     private void sendCallback(Intent intent, boolean keepCallback) {
+
         JSONObject obj = new JSONObject();
         try {
             obj = new JSONObject(intent.getStringExtra(SyncService.EXTRA_EVENT));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
         }
-        if (this.callbackContext != null) {
-            PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
-            result.setKeepCallback(keepCallback);
-            this.callbackContext.sendPluginResult(result);
+        if( obj.optString("eventType")=="sync_completed")
+            checkFilesChanged();
+
+        if (this.callbackContext == null)
+            return;
+        PluginResult result = new PluginResult(PluginResult.Status.OK, obj);
+        result.setKeepCallback(keepCallback);
+        this.callbackContext.sendPluginResult(result);
+    }
+    public void checkFilesChanged() {
+        try {
+            SyncSettings syncs = lssm.getSyncSettings();
+            if (syncs.isFilesChanged()) {
+                webView.clearCache();
+                syncs.setFilesChanged(false);
+                lssm.setSyncSettings(syncs);
+            }
+        }
+        catch( Exception ex) {
         }
     }
-
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         lssm = new LocalStorageSyncManager(webView.getContext());
+
+        checkFilesChanged();
+
+        IntentFilter intentFilter = new IntentFilter(SyncService.UPDATE_INTENT);
+
+        this.receiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                sendCallback(intent, true);
+            }
+        };
+        webView.getContext().registerReceiver(this.receiver, intentFilter);
+    }
+
+    @Override
+    public void onDestroy() {
+        try {
+            webView.getContext().unregisterReceiver(this.receiver);
+        }
+        catch( Exception ex) {
+
+        }
+        super.onDestroy();
+
     }
 }

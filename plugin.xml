@@ -27,42 +27,32 @@
 				<header-file src="src/ios/DCSync.h" />
 				<source-file src="src/ios/DCSync.m" />
 
-				<header-file src="src/ios/HTTPManager.h" />
-		        <source-file src="src/ios/HTTPManager.m" />
+				<header-file src="src/ios/FilePool.h" />
+				<source-file src="src/ios/FilePool.m" />
+
+				<header-file src="src/ios/DocJSONObject.h" />
+				<source-file src="src/ios/DocJSONObject.m" />
+
+				<header-file src="src/ios/DatacollectorAPI.h" />
+				<source-file src="src/ios/DatacollectorAPI.m" />
 
 		        <header-file src="src/ios/DCSyncConst.h" />
-		        
-		        <header-file src="src/ios/TextResponseSerializer.h" />
-		        <source-file src="src/ios/TextResponseSerializer.m" />
 
-		        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperation.h" />
-		        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperation.m" />
+		        <header-file src="src/ios/ZipArchive/ZipArchive.h" />
+		        <source-file src="src/ios/ZipArchive/ZipArchive.mm" compiler-flags="-fno-objc-arc"/>
 
-		        <header-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.h" />
-		        <source-file src="src/ios/AFNetworking/AFHTTPRequestOperationManager.m" />
+		        <header-file src="src/ios/ZipArchive/minizip/crypt.h" />
+		        <header-file src="src/ios/ZipArchive/minizip/ioapi.h" />
+		        <header-file src="src/ios/ZipArchive/minizip/mztools.h" />
+		        <header-file src="src/ios/ZipArchive/minizip/unzip.h" />
+		        <header-file src="src/ios/ZipArchive/minizip/zip.h" />
 
-		        <header-file src="src/ios/AFNetworking/AFHTTPSessionManager.h" />
-		        <source-file src="src/ios/AFNetworking/AFHTTPSessionManager.m" />
+		        <source-file src="src/ios/ZipArchive/minizip/ioapi.c" />
+		        <source-file src="src/ios/ZipArchive/minizip/mztools.c" />
+		        <source-file src="src/ios/ZipArchive/minizip/unzip.c" />
+		        <source-file src="src/ios/ZipArchive/minizip/zip.c" />
 
-		        <header-file src="src/ios/AFNetworking/AFNetworking.h" />
-
-		        <header-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.h" />
-		        <source-file src="src/ios/AFNetworking/AFNetworkReachabilityManager.m" />
-
-		        <header-file src="src/ios/AFNetworking/AFSecurityPolicy.h" />
-		        <source-file src="src/ios/AFNetworking/AFSecurityPolicy.m" />
-
-		        <header-file src="src/ios/AFNetworking/AFURLConnectionOperation.h" />
-		        <source-file src="src/ios/AFNetworking/AFURLConnectionOperation.m" />
-
-		        <header-file src="src/ios/AFNetworking/AFURLRequestSerialization.h" />
-		        <source-file src="src/ios/AFNetworking/AFURLRequestSerialization.m" />
-
-		        <header-file src="src/ios/AFNetworking/AFURLResponseSerialization.h" />
-		        <source-file src="src/ios/AFNetworking/AFURLResponseSerialization.m" />
-
-		        <header-file src="src/ios/AFNetworking/AFURLSessionManager.h" />
-		        <source-file src="src/ios/AFNetworking/AFURLSessionManager.m" />
+		        <framework src="libz.1.2.5.tbd" />
 
 		        <framework src="Security.framework" />
 		        <framework src="SystemConfiguration.framework" />
