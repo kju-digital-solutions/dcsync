@@ -11,20 +11,33 @@
 
 @interface DocJSONObject : NSObject
 
-+ (id)sharedDocJSONObject;
++ (DocJSONObject *)sharedDocJSONObject;
+
+-(BOOL)setOutputPath:(NSString *) path;
 
 -(void)mergeDJSON:(NSMutableArray *) dJson;
--(void)mergeDJSONFromFile:(NSString *) dJsonFile;
+-(void)mergeDJSONFromFile:(NSString *) dJsonFile
+                completed:(BOOL) completed;
 
 -(void)saveDJSON;
 
--(void)searchDocument:(NSDictionary *) query
-               option:(NSDictionary *) option
-             callback:(void (^)(NSArray * arrDCDocuments))callback;
+-(NSDictionary *)getDocumentCount:(NSString *) path;
 
 
-@property (nonatomic, retain) NSString * outputPath;
-@property (nonatomic, retain) NSMutableArray *arrDocuments;
+-(NSMutableArray *)searchDocument:(NSDictionary *) query
+                           option:(NSDictionary *) option;
+
+-(NSDictionary *)deleteDocument:(NSString *) cid;
+
+-(NSDictionary *)saveDocument:(NSMutableDictionary *) document;
+
+-(double)getLastSyncDate;
+
+
+@property (nonatomic, retain) NSString * rootPath;
+@property (nonatomic, retain) NSMutableArray * arrDocuments;
+@property (nonatomic, retain) NSMutableDictionary * syncInfo;
+@property (nonatomic, retain) NSMutableArray * arrUnsyncedDocuments;
 
 @end
 

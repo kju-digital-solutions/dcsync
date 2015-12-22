@@ -25,6 +25,20 @@ static FilePool *pool = nil;
     return pool;
 }
 
+-(BOOL)setOutputPath:(NSString *)path {
+    BOOL result;
+    
+    if (![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&result]) {
+        NSLog(@"File pool output path is not valid");
+        return NO;
+    }
+    
+    
+    _rootPath = path;
+    
+    return YES;
+}
+
 
 
 - (void)extractFromData:(NSData *)data {
@@ -39,6 +53,8 @@ static FilePool *pool = nil;
     if (!self.rootPath) {
         return @"";
     }
+    
+    BOOL a = [[NSFileManager defaultManager] fileExistsAtPath:self.rootPath];
     
     ZipArchive *zipArchive = [[ZipArchive alloc] init];
     [zipArchive UnzipOpenFile:strFile];

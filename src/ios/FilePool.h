@@ -13,6 +13,8 @@
 
 + (id)sharedPool;
 
+-(BOOL)setOutputPath:(NSString *)path;
+
 - (void)extractFromData:(NSData *)data;
 - (NSString *)extractFromFile:(NSString *)strFile;
 

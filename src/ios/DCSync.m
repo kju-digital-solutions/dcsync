@@ -52,9 +52,14 @@
 #ifdef ___DEBUG___
     
     
+    if (![[FilePool sharedPool] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"]) {
+        //
+        
+    }
     
-    [[FilePool sharedPool] setRootPath:@"/Volumes/Work/Hybrid/dcsync/temp"];
-    [[DocJSONObject sharedDocJSONObject] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"];
+    if (![[DocJSONObject sharedDocJSONObject] setOutputPath:@"/Volumes/Work/Hybrid/dcsync/temp"]) {
+        //
+    }
     
     
     
@@ -113,7 +118,14 @@
  ##################################################################################################*/
 - (void)getLastSync:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
     
+    double timeStamp = [[DocJSONObject sharedDocJSONObject] getLastSyncDate];
+    
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:timeStamp];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -127,7 +139,16 @@
  ##################################################################################################*/
 - (void)getDocumentCount:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
     
+    NSString * path = [command.arguments objectAtIndex:0];
+    
+    NSDictionary * info = [[DocJSONObject sharedDocJSONObject] getDocumentCount:path];
+    
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -142,7 +163,13 @@
  ##################################################################################################*/
 - (void)getContentRootUri:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
     
+    NSString * path = [[FilePool sharedPool] rootPath];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:path];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -166,7 +193,7 @@
     CFRelease(uuidRef);
     NSString * cid = (__bridge_transfer NSString *)uuidStringRef;
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:cid];
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:cid];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
@@ -182,7 +209,22 @@
  ##################################################################################################*/
 - (void)saveDocument:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
     
+    NSMutableDictionary * document = [NSMutableDictionary dictionaryWithDictionary:@{
+                                @"cid": [command.arguments objectAtIndex:0],
+                                @"path": [command.arguments objectAtIndex:1],
+                                @"document": [command.arguments objectAtIndex:2],
+                                @"files": [command.arguments objectAtIndex:3],
+                                @"local": [command.arguments objectAtIndex:4]
+                                }];
+    
+    [[DocJSONObject sharedDocJSONObject] saveDocument:document];
+    
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:document];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -197,7 +239,15 @@
  ##################################################################################################*/
 - (void)deleteDocument:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
+
+    NSString * cid = [command.arguments objectAtIndex:0];
     
+    NSDictionary * deletedFile = [[DocJSONObject sharedDocJSONObject] deleteDocument:cid];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deletedFile];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -233,15 +283,18 @@
                                      */
                                 }
                                 else {
+                                    
                                     NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
-                                    [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile];
+                                    
                                     
                                     NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
                                     NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
                                     
                                     self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
-                                    
                                     BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
+                                    
+                                    [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile completed:completed];
+                                    
                                     
                                     if (completed) {
                                         /*
@@ -295,17 +348,12 @@
     NSDictionary *paramQuery = [command.arguments objectAtIndex:0];
     NSDictionary *paramOption = [command.arguments objectAtIndex:1];
     
-    NSError* __autoreleasing error = nil;
     CDVPluginResult* result = nil;
-    NSString* message = nil;
     
-    [[DocJSONObject sharedDocJSONObject] searchDocument:paramQuery
-                                                 option:paramOption
-                                               callback:^(NSArray *arrDCDocuments){
-        
-    }];
+    NSMutableArray * arrDocs = [[DocJSONObject sharedDocJSONObject] searchDocument:paramQuery
+                                                                             option:paramOption];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:message];
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrDocs];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
