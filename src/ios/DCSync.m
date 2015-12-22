@@ -246,7 +246,11 @@
     
     NSDictionary * deletedFile = [[DocJSONObject sharedDocJSONObject] deleteDocument:cid];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deletedFile];
+    if (deletedFile)
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deletedFile];
+    else
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Not found DCDocument."];
+    
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
