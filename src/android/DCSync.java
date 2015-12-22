@@ -230,17 +230,23 @@ public class DCSync extends CordovaPlugin {
                         String where = "";
                         ArrayList<String> params = new ArrayList<String>();
                         HashMap<String, String> fields = new HashMap<String, String>();
-
+                        boolean exactMatch = options.optBoolean("exactMatch", false);
                         if( options.has("path")) {
-                            where += "path=? ";
-                            params.add(options.getString("path"));
+                            if( exactMatch) {
+                                where += "path=? ";
+                                params.add(options.getString("path"));
+                            }
+                            else {
+                                where += "path like ? ";
+                                params.add(options.getString("path") + "%");
+                            }
                         }
                         Iterator<String> it = documentFilter.keys();
                         while ( it.hasNext()) {
                             String field =  it.next();
                             fields.put( field, documentFilter.getString(field));
                         }
-                        List<DCDocument> list = lssm.searchDCDocuments(where,params.toArray(new String[params.size()]),fields, options.optBoolean("exactMatch", false), options.optInt("skipResults", 0), options.optInt("maxResults", 100));
+                        List<DCDocument> list = lssm.searchDCDocuments(where,params.toArray(new String[params.size()]),fields, exactMatch, options.optInt("skipResults", 0), options.optInt("maxResults", 100));
                         JSONArray arr = new JSONArray();
                         for( DCDocument dc : list) {
                             arr.put(dc.toJSON());
