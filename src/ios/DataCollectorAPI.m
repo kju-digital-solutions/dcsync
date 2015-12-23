@@ -43,13 +43,6 @@ DataCollectorAPI * api;
     NSData *postData = [NSJSONSerialization dataWithJSONObject:param options:0 error:&error];
     [request setHTTPBody:postData];
     
-    /*
-    NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request
-                                                    completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                                                        completion(location.path);
-                                                        
-                                                    }];
-    */
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request];
     
     self.listener = listener;

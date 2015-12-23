@@ -30,9 +30,6 @@
 				<header-file src="src/ios/FilePool.h" />
 				<source-file src="src/ios/FilePool.m" />
 
-				<header-file src="src/ios/DocJSONObject.h" />
-				<source-file src="src/ios/DocJSONObject.m" />
-
 				<header-file src="src/ios/DatacollectorAPI.h" />
 				<source-file src="src/ios/DatacollectorAPI.m" />
 
@@ -40,6 +37,9 @@
 
 		        <header-file src="src/ios/ZipArchive/ZipArchive.h" />
 		        <source-file src="src/ios/ZipArchive/ZipArchive.mm" compiler-flags="-fno-objc-arc"/>
+
+		        <header-file src="src/ios/SQLiteManager.h" />
+		        <source-file src="src/ios/SQLiteManager.m" compiler-flags="-fno-objc-arc"/>
 
 		        <header-file src="src/ios/ZipArchive/minizip/crypt.h" />
 		        <header-file src="src/ios/ZipArchive/minizip/ioapi.h" />
@@ -53,6 +53,7 @@
 		        <source-file src="src/ios/ZipArchive/minizip/zip.c" />
 
 		        <framework src="libz.1.2.5.tbd" />
+		        <framework src="libsqlite3.tbd" />
 
 		        <framework src="Security.framework" />
 		        <framework src="SystemConfiguration.framework" />

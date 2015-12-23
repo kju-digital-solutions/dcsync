@@ -14,8 +14,8 @@
 #import "DCSyncConst.h"
 
 #import "filepool.h"
-#import "DocJSONObject.h"
 #import "DataCollectorAPI.h"
+#import "sqliteobject.h"
 
 #import <CommonCrypto/CommonDigest.h>
 
@@ -49,24 +49,25 @@
     
     self.syncTimeStamp = @"";
     
+    NSString * root = NSTemporaryDirectory();
+
+    
+    
 #ifdef ___DEBUG___
     
-    
-    if (![[FilePool sharedPool] setOutputPath:NSTemporaryDirectory()]) {
-        //
-        
-    }
-    
-    if (![[DocJSONObject sharedDocJSONObject] setOutputPath:NSTemporaryDirectory()]) {
-        //
-    }
-    
-    
-    
+    root = @"/Volumes/Work/Hybrid/dcsync/temp";
     
     
     
 #endif
+    if (![[FilePool sharedPool] setOutputPath:root]) {
+        //
+        
+    }
+    
+    NSString * dbPath = [NSString stringWithFormat:@"%@/dcd.db", root];
+    
+    [[SqliteObject sharedSQLObj] create:dbPath];
     
     
     
@@ -118,13 +119,16 @@
  ##################################################################################################*/
 - (void)getLastSync:(CDVInvokedUrlCommand*)command
 {
-    NSString* callbackId = command.callbackId;
+    NSString * callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
-    double timeStamp = [[DocJSONObject sharedDocJSONObject] getLastSyncDate];
+    double timeStamp = [[SqliteObject sharedSQLObj] getLatestSyncDate];
     
+    if (timeStamp)
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:timeStamp];
+    else
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDouble:0];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:timeStamp];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
@@ -144,10 +148,13 @@
     
     NSString * path = [command.arguments objectAtIndex:0];
     
-    NSDictionary * info = [[DocJSONObject sharedDocJSONObject] getDocumentCount:path];
+    NSMutableDictionary * ret = [NSMutableDictionary dictionaryWithDictionary:@{
+                                   @"count": [[SqliteObject sharedSQLObj] getDocumentCountInPath:path],
+                                   @"unsynced": [[SqliteObject sharedSQLObj] getUnsyncedDocumentCountInPath:path]
+                                   }];
     
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:info];
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:ret];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
@@ -188,13 +195,16 @@
     NSString* callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:[self generateCID]];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
+
+
+-(NSString *)generateCID {
     CFUUIDRef uuidRef = CFUUIDCreate(NULL);
     CFStringRef uuidStringRef = CFUUIDCreateString(NULL, uuidRef);
     CFRelease(uuidRef);
-    NSString * cid = (__bridge_transfer NSString *)uuidStringRef;
-    
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:cid];
-    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    return (__bridge_transfer NSString *)uuidStringRef;
 }
 
 
@@ -212,15 +222,38 @@
     NSString* callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
+    NSString * cid = [command.arguments objectAtIndex:0];
+    
+    if (cid == nil || [cid isEqualToString:@""]) {
+        cid = [self generateCID];
+    }
+    
     NSMutableDictionary * document = [NSMutableDictionary dictionaryWithDictionary:@{
-                                @"cid": [command.arguments objectAtIndex:0],
+                                @"cid": cid,
                                 @"path": [command.arguments objectAtIndex:1],
                                 @"document": [command.arguments objectAtIndex:2],
                                 @"files": [command.arguments objectAtIndex:3],
                                 @"local": [command.arguments objectAtIndex:4]
                                 }];
     
-    [[DocJSONObject sharedDocJSONObject] saveDocument:document];
+    NSNumber * timeStamp = [NSNumber numberWithDouble:[NSDate date].timeIntervalSince1970];
+    
+    [document setValue:timeStamp forKey:@"modified_date"];
+    [document setValue:timeStamp forKey:@"creation_date"];
+    
+    [document setValue:@0 forKey:@"creator_duid"];
+    [document setValue:@0 forKey:@"modified_duid"];
+    
+    if (![[document valueForKey:@"local"] boolValue]) {
+        [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
+    }
+    
+    int ret = [[SqliteObject sharedSQLObj] updateDCD:document];
+    
+    if (ret == -1)
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Executing sql failed."];
+    else
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:document];
     
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:document];
@@ -244,12 +277,26 @@
 
     NSString * cid = [command.arguments objectAtIndex:0];
     
-    NSDictionary * deletedFile = [[DocJSONObject sharedDocJSONObject] deleteDocument:cid];
+    NSArray * documents = [[SqliteObject sharedSQLObj] getDCDFromCID:cid];
     
-    if (deletedFile)
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:deletedFile];
-    else
+    if (documents.count == 0) {
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Not found DCDocument."];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    }
+    
+    NSMutableDictionary * document = [documents objectAtIndex:0];
+    
+    [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"deleted"];
+    
+    // Check if the local flag is set...
+    if (![[document valueForKey:@"local"] boolValue]) {
+        [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
+    }
+    
+    if ([[SqliteObject sharedSQLObj] updateDCD:document] == -1)
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Excuting sql failed."];
+    else
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:document];
     
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
@@ -279,12 +326,14 @@
         self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
         BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
         
-        [[DocJSONObject sharedDocJSONObject] mergeDJSONFromFile:strJSONFile completed:completed];
+        [[SqliteObject sharedSQLObj] mergeDJSONFromFile:strJSONFile completed:completed];
         
         
         if (completed) {
             NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
             [self.commandDelegate evalJs:jsString];
+            
+            self.syncTimeStamp = @"";
             
         }
         else {
@@ -354,8 +403,8 @@
     
     CDVPluginResult* result = nil;
     
-    NSMutableArray * arrDocs = [[DocJSONObject sharedDocJSONObject] searchDocument:paramQuery
-                                                                             option:paramOption];
+    NSArray * arrDocs = [[SqliteObject sharedSQLObj] searchDocument:paramQuery
+                                                                    option:paramOption];
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrDocs];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
