@@ -45,9 +45,18 @@
 
 - (void)pluginInitialize
 {
+    NSMutableDictionary * option = nil;
+    
     [super pluginInitialize];
     
-    self.syncTimeStamp = @"";
+    self.param = [NSMutableDictionary new];
+    
+    // Initialize udid...
+    [self.param setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"duid"];
+    [self.param setValue:@"" forKey:@"token"];
+    [self.param setValue:@"" forKey:@"sync_timestamp"];
+    [self.param setValue:DCSYNC_HASH forKey:@"hash"];
+    
     
     NSString * root = NSTemporaryDirectory();
 
@@ -69,18 +78,42 @@
     
     [[SqliteObject sharedSQLObj] create:dbPath];
     
+    if ((option = [[SqliteObject sharedSQLObj] loadSyncOption])) {
+        self.syncOption = option;
+    }
+    else {
+        self.syncOption = [NSMutableDictionary new];
+        
+        /*
+         Initialize sync option....
+         This will be updated with syncoption table record....
+         */
+        [self.syncOption setValue:@"https://datacollector.kju.com/DC2" forKey:@"url"];
+        [self.syncOption setValue:@1440 forKey:@"interval"];
+        [self.syncOption setValue:DCSYNC_TESTER forKey:@"username"];
+        [self.syncOption setValue:DCSYNC_PASSWORD forKey:@"password"];
+        [self.syncOption setValue:@{} forKey:@"params"];
+        [self.syncOption setValue:@false forKey:@"insistOnBackground"];
+        [self.syncOption setValue:@{} forKey:@"event_filter"];
+    }
     
     
-    if (!accessToken)
+    NSString * token = [self.param valueForKey:@"token"];
+    
+    if (token == nil || [token isEqualToString:@""])
     {
-        [self authenticate];
+        [self authenticate:nil];
     }
     
 }
 
 
-- (void)authenticate {
-    NSDictionary *param = @{@"u": DCSYNC_TESTER, @"p": DCSYNC_PASSWORD, @"d": DCSYNC_HASH };
+- (void)authenticate:(CDVInvokedUrlCommand*)command; {
+    
+    NSDictionary *param = @{@"u": [self.syncOption valueForKey:@"username"],
+                            @"p": /*[self.syncOption valueForKey:@"password"]*/ DCSYNC_PASSWORD,
+                            @"d": [self.param valueForKey:@"hash"]
+                            };
     
     NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_AUTH];
     NSURL *URL = [NSURL URLWithString:strURL];
@@ -100,9 +133,37 @@
     NSData *postData = [NSJSONSerialization dataWithJSONObject:param options:0 error:&error];
     [request setHTTPBody:postData];
     
-    NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request
-                                                    completionHandler:^(NSURL *location, NSURLResponse *response, NSError *error) {
-                                                        [[FilePool sharedPool] extractFromFile:location.path];
+    NSURLSessionDataTask *task = [session dataTaskWithRequest:request
+                                                    completionHandler:^(NSData * __nullable data, NSURLResponse * __nullable response, NSError * __nullable error) {
+                                                        NSString * ret = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                                                        
+                                                        NSError *jsonError;
+                                                        NSData *objectData = [ret dataUsingEncoding:NSUTF8StringEncoding];
+                                                        NSDictionary *json = [NSJSONSerialization JSONObjectWithData:objectData
+                                                                                                             options:NSJSONReadingMutableContainers
+                                                                                                               error:&jsonError];
+                                                        
+                                                        NSString * token = [json valueForKey:@"access_token"];
+                                                        
+                                                        
+                                                        
+                                                        if (token == nil || [token isEqualToString:@""]) {
+                                                            
+                                                            if (command) {
+                                                                CDVPluginResult* result = nil;
+                                                                
+                                                                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Authentication failed..."];
+                                                                [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                                                            }
+                                                            
+                                                            return;
+                                                        }
+                                                            
+                                                        
+                                                        [self.param setValue:token forKey:@"token"];
+                                                        
+                                                        if (command)
+                                                            [self performSync:command];
                                                     }];
     
     // Start the task
@@ -323,7 +384,7 @@
         NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
         NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
         
-        self.syncTimeStamp = [json valueForKey:@"sync_timestamp"];
+        [self.param setValue:[json valueForKey:@"sync_timestamp"] forKey:@"sync_timestamp"];
         BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
         
         [[SqliteObject sharedSQLObj] mergeDJSONFromFile:strJSONFile completed:completed];
@@ -333,7 +394,7 @@
             NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
             [self.commandDelegate evalJs:jsString];
             
-            self.syncTimeStamp = @"";
+            [self.param setValue:@"" forKey:@"sync_timestamp"];
             
         }
         else {
@@ -352,23 +413,44 @@
  ##################################################################################################*/
 - (void)performSync:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    
+    CDVPluginResult* result = nil;
     
     // Check root path....
-    if (![[FilePool sharedPool] rootPath])
+    if (![[FilePool sharedPool] rootPath]) {
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"File pool path is not defined."];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        
         return;
+    }
+    
+    NSString * token = [self.param valueForKey:@"token"];
+    
+    if (token == nil || [token isEqualToString:@""]) {
+        [self authenticate:command];
+        
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Retrieving token..."];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        
+        return;
+    }
     
     NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_progress');"];
     [self.commandDelegate evalJs:jsString];
     
-    NSDictionary *param = @{@"t": @"RRn1A4cjkBvwlZL2wj4Vj9KGH9bLMiqSMeckTYcmGwxEBBXvVDP8zDkF7ON1",
-                            @"sync_timestamp": self.syncTimeStamp,
+    NSDictionary *param = @{@"t": token,
+                            @"sync_timestamp": [self.param valueForKey:@"sync_timestamp"],
                             @"upload_only": @"ß",
-                            @"duid":@"",
+                            @"duid":[self.param valueForKey:@"duid"],
                             @"locale":@"",
                             @"extra_params":@"",
                             @"upload_documents":@[]};
                                         
     [[DataCollectorAPI sharedAPI] sync:param listener:self];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Sync started."];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
@@ -381,7 +463,18 @@
  ##################################################################################################*/
 - (void)setSyncOptions:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary *syncOption = [command.arguments objectAtIndex:0];
     
+    [self.syncOption setValue:[syncOption valueForKey:@"url"] forKey:@"url"];
+    [self.syncOption setValue:[syncOption valueForKey:@"username"] forKey:@"username"];
+    [self.syncOption setValue:[syncOption valueForKey:@"password"] forKey:@"password"];
+    [self.syncOption setValue:[syncOption valueForKey:@"interval"] forKey:@"interval"];
+    [self.syncOption setValue:[syncOption valueForKey:@"locale"] forKey:@"locale"];
+    [self.syncOption setValue:[syncOption valueForKey:@"insistOnBackground"] forKey:@"insistOnBackground"];
+    [self.syncOption setValue:[syncOption valueForKey:@"param"] forKey:@"param"];
+    [self.syncOption setValue:[syncOption valueForKey:@"event_filter"] forKey:@"event_filter"];
+    
+    [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
 }
 
 

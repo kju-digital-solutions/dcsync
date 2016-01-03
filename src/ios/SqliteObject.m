@@ -64,6 +64,17 @@ static SqliteObject *sqlobj = nil;
             "CREATE TABLE IF NOT EXISTS UNSYNCED "
             "(dcd_id INTEGER PRIMARY KEY, "
             "cid TEXT);"
+            // SYNCOPTION
+            "CREATE TABLE IF NOT EXISTS SYNCOPTION "
+            "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+            "url TEXT, "
+            "locale TEXT, "
+            "interval INTEGER, "
+            "username TEXT, "
+            "password TEXT, "
+            "params TEXT, "
+            "insistOnBackground BOOL, "
+            "event_filter TEXT);"
             // SYNCINFO
             "CREATE TABLE IF NOT EXISTS SYNCINFO "
             "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -82,18 +93,41 @@ static SqliteObject *sqlobj = nil;
             NSLog(@"Failed to open/create database");
         }
     }
+    // DB already exists..
     else {
         
     }
     [[SQLiteManager singleton] setDatabasePath:path];
 }
 
+-(BOOL)saveSyncOption:(NSMutableDictionary *)option {
+    // Reset id..
+    [option setValue:@0 forKey:@"id"];
+    
+    [[SQLiteManager singleton] update:option into:@"SYNCOPTION" primaryKey:@"id"];
+    
+    return YES;
+}
+
+
+-(NSMutableDictionary *)loadSyncOption {
+    NSArray * result = [[SQLiteManager singleton] findAllFrom:@"SYNCOPTION"];
+    
+    if (![result count]) {
+        return  nil;
+    }
+    
+    return result[0];
+}
+
+
+
 -(void)mergeDCD:(NSMutableArray *) dcdJson {
     /*
      Merge documents ...
      */
     for (NSMutableDictionary * document in dcdJson) {
-        NSDictionary * dic =[document valueForKey:@"document"];
+        NSDictionary * dic = [document valueForKey:@"document"];
         
         if (dic.count) {
             NSData * data = [NSJSONSerialization dataWithJSONObject:dic options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];

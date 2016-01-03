@@ -17,6 +17,8 @@
 + (id)sharedSQLObj;
 
 -(void)create:(NSString *)path;
+-(BOOL)saveSyncOption:(NSMutableDictionary *)option;
+-(NSMutableDictionary *)loadSyncOption;
 
 -(NSNumber *)getDocumentCountInPath:(NSString *) path;
 -(NSNumber *)getUnsyncedDocumentCountInPath:(NSString *) path;

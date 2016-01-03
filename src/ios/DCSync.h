@@ -26,7 +26,8 @@
 
 
 
-@property (nonatomic, retain) NSString *syncTimeStamp;
+@property (nonatomic, retain) NSMutableDictionary * param;
+@property (nonatomic, retain) NSMutableDictionary * syncOption;
 
 
 
