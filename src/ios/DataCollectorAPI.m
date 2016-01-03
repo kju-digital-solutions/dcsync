@@ -40,7 +40,7 @@ DataCollectorAPI * api;
     [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
     
     [request setHTTPMethod:@"POST"];
-    NSData *postData = [NSJSONSerialization dataWithJSONObject:param options:0 error:&error];
+    NSMutableData *postData = [[NSJSONSerialization dataWithJSONObject:param options:0 error:&error] mutableCopy];
     [request setHTTPBody:postData];
     
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request];

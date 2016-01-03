@@ -23,7 +23,7 @@
 
 
 
-#define ___DEBUG___
+//#define ___DEBUG___
 
 
 #define ___RELEASE___
@@ -58,8 +58,10 @@
     [self.param setValue:DCSYNC_HASH forKey:@"hash"];
     
     
-    NSString * root = NSTemporaryDirectory();
-
+    //NSString * root = NSTemporaryDirectory();
+    
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *root = [NSString stringWithFormat:@"file:////%@", [paths objectAtIndex:0]];
     
     
 #ifdef ___DEBUG___
@@ -302,8 +304,8 @@
     [document setValue:timeStamp forKey:@"modified_date"];
     [document setValue:timeStamp forKey:@"creation_date"];
     
-    [document setValue:@0 forKey:@"creator_duid"];
-    [document setValue:@0 forKey:@"modified_duid"];
+    [document setValue:[self.param valueForKey:@"duid"] forKey:@"creator_duid"];
+    [document setValue:[self.param valueForKey:@"duid"] forKey:@"modified_duid"];
     
     if (![[document valueForKey:@"local"] boolValue]) {
         [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
