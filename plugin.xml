@@ -40,6 +40,9 @@
 
 		        <header-file src="src/ios/SQLiteManager.h" />
 		        <source-file src="src/ios/SQLiteManager.m" compiler-flags="-fno-objc-arc"/>
+		        
+		           <header-file src="src/ios/SQLiteObject.h" />
+		        <source-file src="src/ios/SQLiteObject.m" compiler-flags="-fno-objc-arc"/>
 
 		        <header-file src="src/ios/ZipArchive/minizip/crypt.h" />
 		        <header-file src="src/ios/ZipArchive/minizip/ioapi.h" />
