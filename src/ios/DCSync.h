@@ -34,6 +34,9 @@
 -(void)sync_progress:(int) progress;
 -(void)sync_completed:(NSURL *) downloadedFile;
 
+-(NSString *)GetUUID;
+-(NSString*)sha256HashFor:(NSString*)input;
+
 
 
 /*##################################################################################################

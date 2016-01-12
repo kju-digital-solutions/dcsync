@@ -22,6 +22,7 @@
 
 -(NSNumber *)getDocumentCountInPath:(NSString *) path;
 -(NSNumber *)getUnsyncedDocumentCountInPath:(NSString *) path;
+-(NSArray *)getUnsyncedDocuments;
 
 -(NSArray *)getDCDFromCID:(NSString *) cid;
 

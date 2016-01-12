@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "DataCollectorAPI.h"
 #import "DCSyncConst.h"
+#import "FilePool.h"
 
 
 @implementation DataCollectorAPI : NSObject
@@ -24,6 +25,10 @@ DataCollectorAPI * api;
 
 -(void)sync:(NSDictionary * )param
    listener:(DCSync *)listener {
+    NSString *boundary = @"---------------------------14737809831466499882746641449";
+    NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
+    
+
     NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
     NSURL *URL = [NSURL URLWithString:strURL];
     
@@ -36,11 +41,49 @@ DataCollectorAPI * api;
                                                        timeoutInterval:60.0];
     
     
+    
+
+    
+    
     [request addValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request addValue:@"application/json" forHTTPHeaderField:@"Accept"];
     
     [request setHTTPMethod:@"POST"];
     NSMutableData *postData = [[NSJSONSerialization dataWithJSONObject:param options:0 error:&error] mutableCopy];
+    
+    NSArray * files = [param valueForKey:@"upload_documents"];
+    
+    
+    for (NSString * file in files) {
+        NSString * paths = [file valueForKey:@"files"];
+        
+        NSArray *arrPaths = [paths componentsSeparatedByString:@";"];
+        
+        for (NSString * path in arrPaths) {
+            NSString * relativePath = [NSString stringWithFormat:@"%@/%@", [[FilePool sharedPool] rootPath], path];
+            /*
+             Check file exists
+             */
+            if (![[NSFileManager defaultManager] fileExistsAtPath:relativePath]) {
+                
+                // What happened?
+                
+                
+                
+                continue;
+            }
+            
+            NSData *fileContent = [[NSFileManager defaultManager] contentsAtPath:relativePath];
+            
+            [postData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            [postData appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"fileupload\"; filename=\"%@\"\r\n", file]dataUsingEncoding:NSUTF8StringEncoding]];
+            [postData appendData:[@"Content-Type: application/octet-stream\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+            [postData appendData:[NSData dataWithData:fileContent]];
+        }
+    }
+    
+    
+    
     [request setHTTPBody:postData];
     
     NSURLSessionDownloadTask *task = [session downloadTaskWithRequest:request];

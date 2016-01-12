@@ -23,7 +23,7 @@
 
 
 
-//#define ___DEBUG___
+#define ___DEBUG___
 
 
 #define ___RELEASE___
@@ -52,16 +52,16 @@
     self.param = [NSMutableDictionary new];
     
     // Initialize udid...
-    [self.param setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"duid"];
+    //[self.param setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"duid"];
     [self.param setValue:@"" forKey:@"token"];
     [self.param setValue:@"" forKey:@"sync_timestamp"];
-    [self.param setValue:DCSYNC_HASH forKey:@"hash"];
+    [self.param setValue:[self GetUUID] forKey:@"duid"];
     
     
     //NSString * root = NSTemporaryDirectory();
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-    NSString *root = [NSString stringWithFormat:@"file:////%@", [paths objectAtIndex:0]];
+    NSString *root = [paths objectAtIndex:0];
     
     
 #ifdef ___DEBUG___
@@ -94,27 +94,50 @@
         [self.syncOption setValue:@1440 forKey:@"interval"];
         [self.syncOption setValue:DCSYNC_TESTER forKey:@"username"];
         [self.syncOption setValue:DCSYNC_PASSWORD forKey:@"password"];
+        [self.syncOption setValue:[self GetUUID] forKey:@"duid"];
         [self.syncOption setValue:@{} forKey:@"params"];
         [self.syncOption setValue:@false forKey:@"insistOnBackground"];
         [self.syncOption setValue:@{} forKey:@"event_filter"];
     }
     
-    
+    /*
     NSString * token = [self.param valueForKey:@"token"];
     
     if (token == nil || [token isEqualToString:@""])
     {
         [self authenticate:nil];
     }
+     */
     
+}
+
+-(NSString *)GetUUID
+{
+  CFUUIDRef theUUID = CFUUIDCreate(NULL);
+  CFStringRef string = CFUUIDCreateString(NULL, theUUID);
+  CFRelease(theUUID);
+  return (__bridge NSString *)string;
+}
+
+
+-(NSString*)sha256HashFor:(NSString*)input
+{
+    const char* str = [input UTF8String];
+    
+    unsigned char result[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(str, strlen(str), result);
+    
+    NSData *pwHashData = [[NSData alloc] initWithBytes:result length: sizeof result];
+    //And take Base64 of that
+    NSString *base64 = [pwHashData base64Encoding];
+    return base64;
 }
 
 
 - (void)authenticate:(CDVInvokedUrlCommand*)command; {
-    
     NSDictionary *param = @{@"u": [self.syncOption valueForKey:@"username"],
-                            @"p": /*[self.syncOption valueForKey:@"password"]*/ DCSYNC_PASSWORD,
-                            @"d": [self.param valueForKey:@"hash"]
+                            @"p": [self sha256HashFor:[self.syncOption valueForKey:@"password"]],
+                            @"d": [self.syncOption valueForKey:@"duid"]
                             };
     
     NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_AUTH];
@@ -163,6 +186,8 @@
                                                             
                                                         
                                                         [self.param setValue:token forKey:@"token"];
+                                                        
+                                                        [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
                                                         
                                                         if (command)
                                                             [self performSync:command];
@@ -236,7 +261,7 @@
     NSString* callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
-    NSString * path = [[FilePool sharedPool] rootPath];
+    NSString * path = [NSString stringWithFormat:@"file:////%@", [[FilePool sharedPool] rootPath]];
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:path];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
@@ -304,8 +329,8 @@
     [document setValue:timeStamp forKey:@"modified_date"];
     [document setValue:timeStamp forKey:@"creation_date"];
     
-    [document setValue:[self.param valueForKey:@"duid"] forKey:@"creator_duid"];
-    [document setValue:[self.param valueForKey:@"duid"] forKey:@"modified_duid"];
+    [document setValue:[self.syncOption valueForKey:@"duid"] forKey:@"creator_duid"];
+    [document setValue:[self.syncOption valueForKey:@"duid"] forKey:@"modified_duid"];
     
     if (![[document valueForKey:@"local"] boolValue]) {
         [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
@@ -441,13 +466,15 @@
     NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_progress');"];
     [self.commandDelegate evalJs:jsString];
     
+    NSArray * files = [[SqliteObject sharedSQLObj] getUnsyncedDocuments];
+    
     NSDictionary *param = @{@"t": token,
                             @"sync_timestamp": [self.param valueForKey:@"sync_timestamp"],
                             @"upload_only": @"ß",
-                            @"duid":[self.param valueForKey:@"duid"],
+                            @"duid":[self.syncOption valueForKey:@"duid"],
                             @"locale":@"",
                             @"extra_params":@"",
-                            @"upload_documents":@[]};
+                            @"upload_documents":files};
                                         
     [[DataCollectorAPI sharedAPI] sync:param listener:self];
     

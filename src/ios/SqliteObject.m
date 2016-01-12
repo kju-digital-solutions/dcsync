@@ -72,6 +72,7 @@ static SqliteObject *sqlobj = nil;
             "interval INTEGER, "
             "username TEXT, "
             "password TEXT, "
+            "duid TEXT, "
             "params TEXT, "
             "insistOnBackground BOOL, "
             "event_filter TEXT);"
@@ -152,6 +153,12 @@ static SqliteObject *sqlobj = nil;
     NSArray * result = [[SQLiteManager singleton] find:@"cid" from:@"DCDOCUMENTS" where:[NSString stringWithFormat:@"path like '%@%@%@' and unsynced like 1", @"%", path, @"%"]];
     
     return [NSNumber numberWithInteger:result.count];
+}
+
+-(NSArray *)getUnsyncedDocuments {
+    NSArray * result = [[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:@"unsynced like 1"];
+    
+    return result;
 }
 
 
