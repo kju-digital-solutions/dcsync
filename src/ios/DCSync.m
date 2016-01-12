@@ -263,7 +263,7 @@
     
     NSString * path = [NSString stringWithFormat:@"file:////%@", [[FilePool sharedPool] rootPath]];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:path];
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"cdvfile://localhost/persistent/"];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
