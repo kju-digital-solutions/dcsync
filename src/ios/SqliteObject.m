@@ -129,12 +129,15 @@ static SqliteObject *sqlobj = nil;
      */
     for (NSMutableDictionary * document in dcdJson) {
         NSDictionary * dic = [document valueForKey:@"document"];
+        NSDictionary * files = [document valueForKey:@"files"];
+        
         
         if (dic.count) {
-            NSData * data = [NSJSONSerialization dataWithJSONObject:dic options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
-            NSString* strJSON  = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            NSData * documentData = [NSJSONSerialization dataWithJSONObject:dic options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
+            NSData * filesData = [NSJSONSerialization dataWithJSONObject:files options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
             
-            [document setValue:strJSON forKey:@"document"];
+            [document setValue:[[NSString alloc] initWithData:documentData encoding:NSUTF8StringEncoding] forKey:@"document"];
+            [document setValue:[[NSString alloc] initWithData:filesData encoding:NSUTF8StringEncoding] forKey:@"files"];
         }
         
         
@@ -156,14 +159,29 @@ static SqliteObject *sqlobj = nil;
 }
 
 -(NSArray *)getUnsyncedDocuments {
-    NSArray * result = [[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:@"unsynced like 1"];
+    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:@"unsynced like 1"]];
+}
+
+-(NSArray *)correctDataTypes:arrDocuments {
+    for (NSDictionary * dic in arrDocuments) {
+        NSData *objectData = [[dic valueForKey:@"files"] dataUsingEncoding:NSUTF8StringEncoding];
+        NSMutableArray *files = [NSJSONSerialization JSONObjectWithData:objectData options:NSJSONReadingMutableContainers error:nil];
+        [dic setValue:files forKey:@"files"];
+        
+        [dic setValue:[NSNumber numberWithBool:[[dic valueForKey:@"deleted"] boolValue]] forKey:@"deleted"];
+        [dic setValue:[NSNumber numberWithBool:[[dic valueForKey:@"unsynced"] boolValue]] forKey:@"unsynced"];
+        [dic setValue:[NSNumber numberWithBool:[[dic valueForKey:@"local"] boolValue]] forKey:@"local"];
+        [dic setValue:[NSNumber numberWithInt:[[dic valueForKey:@"creation_date"] integerValue]] forKey:@"creation_date"];
+        [dic setValue:[NSNumber numberWithInt:[[dic valueForKey:@"modified_date"] integerValue]] forKey:@"modified_date"];
+        [dic setValue:[NSNumber numberWithInt:[[dic valueForKey:@"server_modified"] integerValue]] forKey:@"server_modified"];
+    }
     
-    return result;
+    return arrDocuments;
 }
 
 
 -(NSArray *)getDCDFromCID:(NSString *) cid {
-    return [[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:[NSString stringWithFormat:@"cid = '%@'", cid]];
+    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:[NSString stringWithFormat:@"cid = '%@'", cid]]];
 }
 
 
@@ -173,9 +191,7 @@ static SqliteObject *sqlobj = nil;
     NSString * searchPath = [option valueForKey:@"path"];
     NSString * condition = [NSString stringWithFormat:@"path like '%@%@%@'", @"%", searchPath, @"%"];
     
-    NSArray * result = [[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition];
-    
-    return result;
+    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition]];
 }
 
 

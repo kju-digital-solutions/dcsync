@@ -55,11 +55,9 @@ DataCollectorAPI * api;
     
     
     for (NSString * file in files) {
-        NSString * paths = [file valueForKey:@"files"];
+        NSArray * paths = [file valueForKey:@"files"];
         
-        NSArray *arrPaths = [paths componentsSeparatedByString:@";"];
-        
-        for (NSString * path in arrPaths) {
+        for (NSString * path in paths) {
             NSString * relativePath = [NSString stringWithFormat:@"%@/%@", [[FilePool sharedPool] rootPath], path];
             /*
              Check file exists

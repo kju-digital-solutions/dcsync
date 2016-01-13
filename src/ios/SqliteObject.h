@@ -42,6 +42,8 @@
 -(void)mergeDJSONFromFile:(NSString *) dJsonFile
                 completed:(BOOL) completed;
 
+-(NSArray *)correctDataTypes:arrDocuments;
+
 @property (nonatomic) sqlite3 * dcd;
 @property (nonatomic) const char * dbpath;
 

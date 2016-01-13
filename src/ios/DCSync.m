@@ -23,7 +23,7 @@
 
 
 
-//#define ___DEBUG___
+#define ___DEBUG___
 
 
 #define ___RELEASE___
@@ -213,7 +213,7 @@
     double timeStamp = [[SqliteObject sharedSQLObj] getLatestSyncDate];
     
     if (timeStamp)
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDouble:timeStamp];
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:@{@"syncDate": [NSNumber numberWithDouble:timeStamp]}];
     else
         result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDouble:0];
     
