@@ -261,9 +261,9 @@
     NSString* callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
-    NSString * path = [NSString stringWithFormat:@"file:////%@", [[FilePool sharedPool] rootPath]];
+    //NSString * path = [NSString stringWithFormat:@"file:////%@", [[FilePool sharedPool] rootPath]];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"cdvfile://localhost/persistent/"];
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"cdvfile://localhost/persistent/files/"];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
