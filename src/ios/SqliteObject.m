@@ -133,12 +133,20 @@ static SqliteObject *sqlobj = nil;
         NSDictionary * dic = [document valueForKey:@"document"];
         NSDictionary * files = [document valueForKey:@"files"];
         
+        NSString * path = [document valueForKey:@"path"];
+        
+        if ([path isEqualToString:@"co2tl_app/index.html"]) {
+            int a =1;
+        }
+        
         
         if (dic.count) {
             NSData * documentData = [NSJSONSerialization dataWithJSONObject:dic options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
-            NSData * filesData = [NSJSONSerialization dataWithJSONObject:files options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
-            
             [document setValue:[[NSString alloc] initWithData:documentData encoding:NSUTF8StringEncoding] forKey:@"document"];
+            
+        }
+        if (files.count) {
+            NSData * filesData = [NSJSONSerialization dataWithJSONObject:files options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
             [document setValue:[[NSString alloc] initWithData:filesData encoding:NSUTF8StringEncoding] forKey:@"files"];
         }
         
