@@ -26,12 +26,15 @@
 
 
 
-@property (nonatomic, retain) NSMutableDictionary * param;
 @property (nonatomic, retain) NSMutableDictionary * syncOption;
 
+@property (nonatomic) int64_t batchCounter;
+@property (nonatomic) int64_t percentagePerBatch;
 
 
--(void)sync_progress:(int) progress;
+-(void)sync_progress:(int64_t) bytesWritten
+   totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
 -(void)sync_completed:(NSURL *) downloadedFile;
 
 -(NSString *)GetUUID;

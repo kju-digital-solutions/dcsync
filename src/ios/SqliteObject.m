@@ -70,6 +70,8 @@ static SqliteObject *sqlobj = nil;
             "url TEXT, "
             "locale TEXT, "
             "interval INTEGER, "
+            "token TEXT, "
+            "sync_timestamp TEXT, "
             "username TEXT, "
             "password TEXT, "
             "duid TEXT, "
@@ -167,6 +169,17 @@ static SqliteObject *sqlobj = nil;
         NSData *objectData = [[dic valueForKey:@"files"] dataUsingEncoding:NSUTF8StringEncoding];
         NSMutableArray *files = [NSJSONSerialization JSONObjectWithData:objectData options:NSJSONReadingMutableContainers error:nil];
         [dic setValue:files forKey:@"files"];
+        
+        objectData = [[dic valueForKey:@"document"] dataUsingEncoding:NSUTF8StringEncoding];
+        
+        if ((files = [NSJSONSerialization JSONObjectWithData:objectData options:NSJSONReadingMutableContainers error:nil]) == nil) {
+            [dic setValue:@{} forKey:@"document"];
+        }
+        else {
+            
+            [dic setValue:files forKey:@"document"];
+        }
+        
         
         [dic setValue:[NSNumber numberWithBool:[[dic valueForKey:@"deleted"] boolValue]] forKey:@"deleted"];
         [dic setValue:[NSNumber numberWithBool:[[dic valueForKey:@"unsynced"] boolValue]] forKey:@"unsynced"];

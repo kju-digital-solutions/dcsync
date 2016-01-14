@@ -93,7 +93,9 @@ DataCollectorAPI * api;
 }
 
 -(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {
-    [self.listener sync_progress:((double)totalBytesWritten / (double)totalBytesExpectedToWrite) * 100.0];
+    [self.listener sync_progress:bytesWritten
+               totalBytesWritten:totalBytesWritten
+       totalBytesExpectedToWrite:totalBytesExpectedToWrite];
 }
 
 -(void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error {

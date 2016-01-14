@@ -23,7 +23,7 @@
 
 
 
-//#define ___DEBUG___
+#define ___DEBUG___
 
 
 #define ___RELEASE___
@@ -49,13 +49,13 @@
     
     [super pluginInitialize];
     
-    self.param = [NSMutableDictionary new];
-    
     // Initialize udid...
     //[self.param setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"duid"];
-    [self.param setValue:@"" forKey:@"token"];
-    [self.param setValue:@"" forKey:@"sync_timestamp"];
-    [self.param setValue:[self GetUUID] forKey:@"duid"];
+    [self.syncOption setValue:@"" forKey:@"token"];
+    [self.syncOption setValue:@"" forKey:@"sync_timestamp"];
+    [self.syncOption setValue:[self GetUUID] forKey:@"duid"];
+    
+    self.batchCounter = self.percentagePerBatch = 0;
     
     
     //NSString * root = NSTemporaryDirectory();
@@ -185,7 +185,7 @@
                                                         }
                                                             
                                                         
-                                                        [self.param setValue:token forKey:@"token"];
+                                                        [self.syncOption setValue:token forKey:@"token"];
                                                         
                                                         [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
                                                         
@@ -391,7 +391,22 @@
 
 
 
--(void)sync_progress:(int) progress {
+-(void)sync_progress:(int64_t) bytesWritten
+        totalBytesWritten:(int64_t)totalBytesWritten
+totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
+
+{
+    int progress = 0;
+    
+    if (self.batchCounter == 0) {
+        progress = ((double)totalBytesWritten / (double)totalBytesExpectedToWrite) * 50;
+    }
+    else {
+        progress = ((double)totalBytesWritten / (double)totalBytesExpectedToWrite) * self.percentagePerBatch + (self.batchCounter - 1) * self.percentagePerBatch + 50;
+    }
+    
+    
+    
     NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: %d});", progress];
     [self.commandDelegate evalJs:jsString];
 }
@@ -411,7 +426,17 @@
         NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
         NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
         
-        [self.param setValue:[json valueForKey:@"sync_timestamp"] forKey:@"sync_timestamp"];
+        
+        // Record the timestamp to syncoption...
+        [self.syncOption setValue:[json valueForKey:@"sync_timestamp"] forKey:@"sync_timestamp"];
+        self.percentagePerBatch = 50 / ([[json valueForKey:@"sync_batches" ] intValue] - 1);
+        self.batchCounter++;
+        
+        /*
+            Save Sync option....
+         */
+        [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
+        
         BOOL completed = [[json valueForKey:@"sync_completed"] boolValue];
         
         [[SqliteObject sharedSQLObj] mergeDJSONFromFile:strJSONFile completed:completed];
@@ -420,8 +445,6 @@
         if (completed) {
             NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
             [self.commandDelegate evalJs:jsString];
-            
-            [self.param setValue:@"" forKey:@"sync_timestamp"];
             
         }
         else {
@@ -452,13 +475,13 @@
         return;
     }
     
-    NSString * token = [self.param valueForKey:@"token"];
+    NSString * token = [self.syncOption valueForKey:@"token"];
     
     if (token == nil || [token isEqualToString:@""]) {
         [self authenticate:command];
         
-        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Retrieving token..."];
-        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        //result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Retrieving token..."];
+        //[self.commandDelegate sendPluginResult:result callbackId:callbackId];
         
         return;
     }
@@ -468,8 +491,13 @@
     
     NSArray * files = [[SqliteObject sharedSQLObj] getUnsyncedDocuments];
     
+    NSString * stamp = [self.syncOption valueForKey:@"sync_timestamp"];
+    
+    if (stamp == nil || [stamp isEqualToString:@" "])
+        stamp = @"";
+    
     NSDictionary *param = @{@"t": token,
-                            @"sync_timestamp": [self.param valueForKey:@"sync_timestamp"],
+                            @"sync_timestamp": stamp,
                             @"upload_only": @"ß",
                             @"duid":[self.syncOption valueForKey:@"duid"],
                             @"locale":@"",
