@@ -553,11 +553,129 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     
     CDVPluginResult* result = nil;
     
+    NSMutableArray * arrResult = [[NSMutableArray alloc] init];
+    
     NSArray * arrDocs = [[SqliteObject sharedSQLObj] searchDocument:paramQuery
                                                                     option:paramOption];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrDocs];
+    /*
+     arrDocs --- >
+     */
+    
+    //NSDictionary *dictA = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y", @"z":@"m"}}, @"e"]};
+    //NSDictionary *dictB = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y"}}]};
+    
+    
+    
+    for (NSDictionary * doc in arrDocs) {
+        NSDictionary * document = [doc valueForKey:@"document"];
+        
+        if([self isDictonaryA:document hasContain:paramQuery]) {
+            [arrResult addObject:document];
+        }
+    }
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrResult];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
+
+- (BOOL)isDictonaryA:(NSDictionary *)dictA
+          hasContain:(NSDictionary *)dictB{
+    
+    if (dictA == nil || dictB == nil) return NO;
+    
+    BOOL res = NO;
+    
+    NSArray *keysB = [dictB allKeys];
+    
+    for (id item in keysB){
+        
+        NSObject *objB = [dictB objectForKey:item];
+        
+        if (objB == nil)
+            return NO;
+        else{
+            NSObject *objA = [dictA objectForKey:item];
+            
+            if (objA == nil) {
+                return NO;
+            }
+            
+            if ([objA isKindOfClass:[NSString class]]){
+                NSString *string = (NSString *) objA;
+                
+                if ([string isEqualToString:(NSString *) objB]){
+                    res = YES;
+                } else {
+                    return NO;
+                }
+            }
+            
+            if ([objA isKindOfClass:[NSNumber class]]){
+                NSNumber *number = (NSNumber *) objA;
+                
+                if([number isEqualToNumber:(NSNumber *) objB])
+                    res = YES;
+                else
+                    return NO;
+            }
+            
+            if ([objA isKindOfClass:[NSDictionary class]]){
+                res = [self isDictonaryA:(NSDictionary *) objA hasContain:(NSDictionary *) objB];
+                
+                if (!res)  return NO;
+            }
+            
+            if ([objA isKindOfClass:[NSArray class]]){
+                res = [self isArrayA:(NSArray *) objA hasContain:(NSArray *) objB];
+                
+                if (!res)  return NO;
+            }
+        }
+    }
+    
+    return res;
+}
+
+- (BOOL)isArrayA:(NSArray *)arrayA
+      hasContain:(NSArray *)arrayB{
+    
+    if (arrayA == nil || arrayB == nil) return NO;
+    
+    BOOL res = NO;
+    
+    for (id objB in arrayB) {
+        if (objB == nil) {
+            return NO;
+        }
+        
+        if ([objB isKindOfClass:[NSArray class]]) {
+            for (id objA in arrayA) {
+                if ([objA isKindOfClass:[NSArray class]]) {
+                    res = [self isArrayA:objA hasContain:objB];
+                    
+                    if (!res) return NO;
+                }
+            }
+        }
+        else if ([objB isKindOfClass:[NSDictionary class]]) {
+            for (id objA in arrayA) {
+                if ([objA isKindOfClass:[NSDictionary class]]) {
+                    res = [self isDictonaryA:objA hasContain:objB];
+                    
+                    if (!res) return NO;
+                }
+            }
+        }
+        else{
+            if (![arrayA containsObject:objB]) {
+                return NO;
+            }
+        }
+        
+    }
+    
+    return res;
 }
 
 @end
