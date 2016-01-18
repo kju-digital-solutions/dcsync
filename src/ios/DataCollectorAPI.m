@@ -24,12 +24,13 @@ DataCollectorAPI * api;
 }
 
 -(void)sync:(NSDictionary * )param
+        url:(NSString *) url
    listener:(DCSync *)listener {
     NSString *boundary = @"---------------------------14737809831466499882746641449";
     NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",boundary];
     
 
-    NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
+    NSString * strURL = url;//[NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
     NSURL *URL = [NSURL URLWithString:strURL];
     
     NSError *error;

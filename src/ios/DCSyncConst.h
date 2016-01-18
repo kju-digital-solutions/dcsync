@@ -12,7 +12,7 @@
 #define CID_LENGTH          32
 
 
-#define DCSYNC_WSE_URL      @"http://ch-co2tieferlegen.preview.kju.at"
+#define DCSYNC_WSE_URL      @"http://ch-co2tieferlegen.preview.kju.at/dc"
 
 
 
@@ -20,8 +20,8 @@
  Backend entries......
 ####################################################################################################*/
 
-#define DCSYNC_WSE_AUTH      @"/dc/accesstoken"
-#define DCSYNC_WSE_SYNC      @"/dc/sync"
+#define DCSYNC_WSE_AUTH      @"/accesstoken"
+#define DCSYNC_WSE_SYNC      @"/sync"
 
 
 

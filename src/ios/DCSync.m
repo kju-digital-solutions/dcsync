@@ -140,7 +140,7 @@
                             @"d": [self.syncOption valueForKey:@"duid"]
                             };
     
-    NSString * strURL = [NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_AUTH];
+    NSString * strURL = [NSString stringWithFormat:@"%@%@", [self.syncOption valueForKey:@"url"], DCSYNC_WSE_AUTH];
     NSURL *URL = [NSURL URLWithString:strURL];
     
     NSError *error;
@@ -412,7 +412,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 }
 
 -(void)sync_error:(NSString *) downloadErr {
-    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: %@});", downloadErr];
+    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: '%@'});", downloadErr];
     [self.commandDelegate evalJs:jsString];
 }
 
@@ -521,8 +521,10 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
                             @"locale":@"",
                             @"extra_params":@"",
                             @"upload_documents":files};
+    
+    NSString * url = [NSString stringWithFormat:@"%@/%@", [self.syncOption valueForKey:@"url"], DCSYNC_WSE_SYNC];
                                         
-    [[DataCollectorAPI sharedAPI] sync:param listener:self];
+    [[DataCollectorAPI sharedAPI] sync:param url:url listener:self];
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Sync started."];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];

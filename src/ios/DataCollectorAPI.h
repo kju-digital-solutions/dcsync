@@ -19,6 +19,7 @@
            password:(NSString *)password;
 
 -(void)sync:(NSDictionary *) param
+        url:(NSString *) url
    listener:(DCSync *)listener;
 
 
