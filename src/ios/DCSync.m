@@ -411,6 +411,10 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     [self.commandDelegate evalJs:jsString];
 }
 
+-(void)sync_error:(NSString *) downloadErr {
+    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: %@});", downloadErr];
+    [self.commandDelegate evalJs:jsString];
+}
 
 -(void)sync_completed:(NSURL *) downloadedFile {
     NSString * strRoot = [[FilePool sharedPool] extractFromFile:downloadedFile.path];
@@ -419,17 +423,31 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         
     }
     else {
-        
         NSString * strJSONFile = [NSString stringWithFormat:@"%@%@", strRoot, @"/documents.json"];
         
         
         NSData *data = [NSData dataWithContentsOfFile:[NSString stringWithFormat:@"%@%@", strRoot, @"/sync.json"]];
+        
+        if (data == nil) {
+            [self sync_error:(@"Error occured during Sync operation. sync.json or zip file not found.")];
+            
+            return;
+        }
+        
         NSMutableArray *json = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
         
         
         // Record the timestamp to syncoption...
         [self.syncOption setValue:[json valueForKey:@"sync_timestamp"] forKey:@"sync_timestamp"];
-        self.percentagePerBatch = 50 / ([[json valueForKey:@"sync_batches" ] intValue] - 1);
+        
+        int remainingBatchCnt = [[json valueForKey:@"sync_batches" ] intValue] - 1;
+        
+        self.percentagePerBatch = 50;
+        
+        if (remainingBatchCnt != 0) {
+            self.percentagePerBatch = 50 / remainingBatchCnt;
+        }
+        
         self.batchCounter++;
         
         /*
@@ -520,6 +538,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
  ##################################################################################################*/
 - (void)setSyncOptions:(CDVInvokedUrlCommand*)command
 {
+    NSString* callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
+    
     NSDictionary *syncOption = [command.arguments objectAtIndex:0];
     
     [self.syncOption setValue:[syncOption valueForKey:@"url"] forKey:@"url"];
@@ -532,6 +553,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     [self.syncOption setValue:[syncOption valueForKey:@"event_filter"] forKey:@"event_filter"];
     
     [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Sync option changed successfully."];
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
 
