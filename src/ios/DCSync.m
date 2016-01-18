@@ -336,6 +336,11 @@
         [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
     }
     
+    NSData * filesData = [NSJSONSerialization dataWithJSONObject:[document valueForKey:@"files"] options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
+    
+    if (filesData)
+        [document setValue:[[NSString alloc] initWithData:filesData encoding:NSUTF8StringEncoding] forKey:@"files"];
+    
     int ret = [[SqliteObject sharedSQLObj] updateDCD:document];
     
     if (ret == -1)
@@ -412,7 +417,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
 }
 
 -(void)sync_error:(NSString *) downloadErr {
-    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_progress', {percent: '%@'});", downloadErr];
+    NSString * jsString = [NSString stringWithFormat:@"cordova.plugins.DCSync.emit('sync_failed', {error: '%@'});", downloadErr];
     [self.commandDelegate evalJs:jsString];
 }
 
@@ -461,9 +466,11 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         
         
         if (completed) {
+            [[SqliteObject sharedSQLObj] makeDCDAsSynced:self.arrUnsyncedFiles];
+            
             NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
             [self.commandDelegate evalJs:jsString];
-            
+                        
         }
         else {
             [self performSync:nil];
@@ -507,20 +514,22 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_progress');"];
     [self.commandDelegate evalJs:jsString];
     
-    NSArray * files = [[SqliteObject sharedSQLObj] getUnsyncedDocuments];
+    self.arrUnsyncedFiles = [[SqliteObject sharedSQLObj] getUnsyncedDocuments];
     
     NSString * stamp = [self.syncOption valueForKey:@"sync_timestamp"];
     
     if (stamp == nil || [stamp isEqualToString:@" "])
         stamp = @"";
     
+    NSString *currentLanguage = [[NSLocale preferredLanguages] objectAtIndex:0];
+    
     NSDictionary *param = @{@"t": token,
                             @"sync_timestamp": stamp,
-                            @"upload_only": @"ß",
+                            @"upload_only": @0,
                             @"duid":[self.syncOption valueForKey:@"duid"],
-                            @"locale":@"",
-                            @"extra_params":@"",
-                            @"upload_documents":files};
+                            @"locale":currentLanguage,
+                            @"extra_params": @[],
+                            @"upload_documents":self.arrUnsyncedFiles};
     
     NSString * url = [NSString stringWithFormat:@"%@/%@", [self.syncOption valueForKey:@"url"], DCSYNC_WSE_SYNC];
                                         

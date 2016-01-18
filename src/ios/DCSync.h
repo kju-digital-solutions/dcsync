@@ -27,6 +27,7 @@
 
 
 @property (nonatomic, retain) NSMutableDictionary * syncOption;
+@property (nonatomic, retain) NSArray * arrUnsyncedFiles;
 
 @property (nonatomic) int64_t batchCounter;
 @property (nonatomic) int64_t percentagePerBatch;

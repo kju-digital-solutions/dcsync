@@ -135,11 +135,6 @@ static SqliteObject *sqlobj = nil;
         
         NSString * path = [document valueForKey:@"path"];
         
-        if ([path isEqualToString:@"co2tl_app/index.html"]) {
-            int a =1;
-        }
-        
-        
         if (dic.count) {
             NSData * documentData = [NSJSONSerialization dataWithJSONObject:dic options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
             [document setValue:[[NSString alloc] initWithData:documentData encoding:NSUTF8StringEncoding] forKey:@"document"];
@@ -152,6 +147,20 @@ static SqliteObject *sqlobj = nil;
         
         
         NSLog(@"%d", [[SQLiteManager singleton] update:document into:@"DCDOCUMENTS" primaryKey:@"cid"]);
+    }
+}
+
+-(void)makeDCDAsSynced:(NSArray *) arrDCDs {
+    for (NSMutableDictionary * dcd in arrDCDs) {
+        if ([[dcd valueForKey:@"deleted"] boolValue]) {
+            NSString * sql = [NSString stringWithFormat:@"delete from DCDOCUMENTS where cid ='%@'", [dcd valueForKey:@"cid"]];
+            [[SQLiteManager singleton] executeSql:sql];
+        }
+        else if ([dcd valueForKey:@"unsynced"]) {
+            [dcd setValue:[NSNumber numberWithBool:FALSE] forKey:@"unsynced"];
+            
+            [[SQLiteManager singleton] update:dcd into:@"DCDOCUMENTS" primaryKey:@"cid"];
+        }
     }
 }
 

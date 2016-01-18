@@ -29,6 +29,8 @@
 -(NSArray *)searchDocument:(NSDictionary *) query
                     option:(NSDictionary *) option;
 
+-(void)makeDCDAsSynced:(NSArray *) arrDCDs;
+
 -(void)mergeDCD:(NSMutableArray * )dcdJson;
 
 -(int)updateDCD:(NSMutableDictionary *) document;
