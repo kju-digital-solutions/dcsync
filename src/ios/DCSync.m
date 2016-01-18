@@ -571,7 +571,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         NSDictionary * document = [doc valueForKey:@"document"];
         
         if([self isDictonaryA:document hasContain:paramQuery]) {
-            [arrResult addObject:document];
+            [arrResult addObject:doc];
         }
     }
     
@@ -584,7 +584,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     
     if (dictA == nil || dictB == nil) return NO;
     
-    BOOL res = NO;
+    BOOL res = YES;
     
     NSArray *keysB = [dictB allKeys];
     

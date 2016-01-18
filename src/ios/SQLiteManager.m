@@ -267,7 +267,9 @@ static SQLiteManager * sharedSQLiteManager = nil;
     }
 }
 
--(int)update:(NSMutableDictionary *)data into:(NSString *)table primaryKey:(NSString *)primaryKey{
+-(int)update:(NSMutableDictionary *)dict into:(NSString *)table primaryKey:(NSString *)primaryKey{
+    
+    NSMutableDictionary *data = [dict mutableCopy];
     
     int result = 0;
     sqlite3 *database;

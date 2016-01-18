@@ -210,9 +210,30 @@ static SqliteObject *sqlobj = nil;
                     option:(NSDictionary *) option {
     
     NSString * searchPath = [option valueForKey:@"path"];
-    NSString * condition = [NSString stringWithFormat:@"path like '%@%@%@'", @"%", searchPath, @"%"];
+    BOOL exactMatch = [[option valueForKey:@"exactMatch"] boolValue];
+    int skipResult = 0;
     
-    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition]];
+    if ([option valueForKey:@"skipResults"])
+        skipResult = [[option valueForKey:@"skipResults"] intValue];
+    
+    int maxResults = 100;
+    
+    if ([option valueForKey:@"maxResults"])
+        maxResults = [[option valueForKey:@"maxResults"] intValue];
+    
+    NSString * condition;
+    
+    if (exactMatch) {
+        condition = [NSString stringWithFormat:@"path = '%@'", searchPath];
+    }
+    else {
+        condition = [NSString stringWithFormat:@"path like '%@%@%@'", @"%", searchPath, @"%"];
+    }
+    
+    NSString * limit = [NSString stringWithFormat:@"%d,%d", skipResult, maxResults];
+    
+    
+    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition order:@"cid" limit:limit]];
 }
 
 
