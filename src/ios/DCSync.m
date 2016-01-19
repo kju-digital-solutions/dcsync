@@ -455,6 +455,16 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         // Record the timestamp to syncoption...
         [self.syncOption setValue:[json valueForKey:@"sync_timestamp"] forKey:@"sync_timestamp"];
         
+        
+        /*
+            Upload completed even the sync is not done completely.
+            We can set unsynced flag to 0 and delete all files that flagged as deleted....
+         
+         */
+        if ([json valueForKey:@"upload_error"] == nil) {
+            [[SqliteObject sharedSQLObj] makeDCDAsSynced:self.arrUnsyncedFiles];
+        }
+        
         int remainingBatchCnt = [[json valueForKey:@"sync_batches" ] intValue] - 1;
         
         self.percentagePerBatch = 50;
@@ -476,7 +486,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         
         
         if (completed) {
-            [[SqliteObject sharedSQLObj] makeDCDAsSynced:self.arrUnsyncedFiles];
+            
             
             NSString * jsString = [NSString stringWithFormat:@"%@", @"cordova.plugins.DCSync.emit('sync_completed');"];
             [self.commandDelegate evalJs:jsString];
@@ -599,6 +609,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     
     NSUInteger start = [[paramOption objectForKey:@"skipResults"] integerValue];
     NSUInteger limit = [[paramOption objectForKey:@"maxResults"] integerValue];
+    
+    if (limit == 0)
+        limit = MAX_RESULTS_FOR_SEARCHDOCUMENT;
     
     CDVPluginResult* result = nil;
     
