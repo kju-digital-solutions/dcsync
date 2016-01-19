@@ -461,8 +461,12 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
             We can set unsynced flag to 0 and delete all files that flagged as deleted....
          
          */
-        if ([json valueForKey:@"upload_error"] == nil) {
+        if ([json valueForKey:@"upload_error"] == nil || self.arrUnsyncedFiles != nil) {
             [[SqliteObject sharedSQLObj] makeDCDAsSynced:self.arrUnsyncedFiles];
+            
+            // Release all unsynced documents...
+            
+            self.arrUnsyncedFiles = nil;
         }
         
         int remainingBatchCnt = [[json valueForKey:@"sync_batches" ] intValue] - 1;
