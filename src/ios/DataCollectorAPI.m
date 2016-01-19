@@ -69,10 +69,9 @@ DataCollectorAPI * api;
         [postData appendData:[[NSString stringWithFormat:@"%@", value] dataUsingEncoding:NSUTF8StringEncoding]];
     }
     
-    int counter = 0;
+    int counter = 1;
     
     for (NSString * file in files) {
-        [postData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
         NSArray * paths = [file valueForKey:@"files"];
         
         // Check if this is deleted file...
@@ -81,6 +80,7 @@ DataCollectorAPI * api;
         
         for (NSString * path in paths) {
             NSString * relativePath = [NSString stringWithFormat:@"%@/Files/%@", [[FilePool sharedPool] rootPath], path];
+            NSString* theFileName = [relativePath lastPathComponent];
             /*
              Check file exists
              */
@@ -93,16 +93,21 @@ DataCollectorAPI * api;
             
             NSData *fileContent = [[NSFileManager defaultManager] contentsAtPath:relativePath];
             
-            [postData appendData:[[NSString stringWithFormat:@"Content-Disposition:form-data; name=\"file_%d\"; filename=\"%@\"\r\n\r\n", counter++, relativePath] dataUsingEncoding:NSUTF8StringEncoding]];
+            [postData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+            
+            [postData appendData:[[NSString stringWithFormat:@"Content-Disposition:form-data; name=\"file_%d\"; filename=\"%@\"\r\n", counter++, theFileName] dataUsingEncoding:NSUTF8StringEncoding]];
             [postData appendData:[[NSString stringWithFormat:@"Content-Type: %@\r\n\r\n", @"application/octet-stream"] dataUsingEncoding:NSUTF8StringEncoding]];
-            [postData appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-            [postData appendData:[[NSString stringWithFormat:@"%@", fileContent] dataUsingEncoding:NSUTF8StringEncoding]];
+//            [postData appendData:[@"Content-Transfer-Encoding: binary\r\n\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+            [postData appendData:fileContent];
             
             if (error) {
                 NSLog(@"%@", error);
             }
         }
     }
+    
+    [postData appendData:[[NSString stringWithFormat:@"\r\n--%@\r\n", boundary] dataUsingEncoding:NSUTF8StringEncoding]];
+    
     [body appendFormat:@"\r\n%@", boundary];
     
     
