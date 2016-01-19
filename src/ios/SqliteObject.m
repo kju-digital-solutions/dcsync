@@ -245,10 +245,10 @@ static SqliteObject *sqlobj = nil;
         condition = [NSString stringWithFormat:@"path like '%@%@%@'", @"%", searchPath, @"%"];
     }
     
-    NSString * limit = [NSString stringWithFormat:@"%d,%d", skipResult, maxResults];
+//    NSString * limit = [NSString stringWithFormat:@"%d,%d", skipResult, maxResults];
     
     
-    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition order:@"cid" limit:limit]];
+    return [self correctDataTypes:[[SQLiteManager singleton] find:@"*" from:@"DCDOCUMENTS" where:condition]];
 }
 
 

@@ -597,6 +597,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     NSDictionary *paramQuery = [command.arguments objectAtIndex:0];
     NSDictionary *paramOption = [command.arguments objectAtIndex:1];
     
+    NSUInteger start = [[paramOption objectForKey:@"skipResults"] integerValue];
+    NSUInteger limit = [[paramOption objectForKey:@"maxResults"] integerValue];
+    
     CDVPluginResult* result = nil;
     
     NSMutableArray * arrResult = [[NSMutableArray alloc] init];
@@ -621,7 +624,15 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
         }
     }
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrResult];
+    NSArray * arrSubResult = @[];
+    
+    if (start < [arrResult count]) {
+        limit = MIN(limit, [arrResult count] - start);
+        
+        arrSubResult = [arrResult subarrayWithRange:NSMakeRange(start, limit)];
+    }
+    
+    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrSubResult];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
 
