@@ -39,6 +39,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
 -(void)sync_error:(NSString *) downloadedErr;
 -(void)sync_completed:(NSURL *) downloadedFile;
 
+-(NSString *)jsonToString:(id) json;
 -(NSString *)GetUUID;
 -(NSString*)sha256HashFor:(NSString*)input;
 

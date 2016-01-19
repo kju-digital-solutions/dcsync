@@ -30,7 +30,28 @@
 #define DCSYNC_PASSWORD     @"8FN23!3BNCLFA4$GNHIAKDFFNA2abx0938//"
 #define DCSYNC_HASH         @"478f8f3c-e83f-4194-8b6c-c4eaa07269ef"
 
+static NSString * jsonToString(id json) {
+    if (json == nil)
+        return @"{}";
+    
+    NSError *writeError = nil;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted error:&writeError];
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+}
 
+static NSMutableDictionary * stringToJson(NSString * strVal) {
+    if (strVal == nil || [strVal isEqualToString:@""]) {
+        return [@{} mutableCopy];
+    }
+    
+    NSError *jsonError;
+    NSData *objectData = [strVal dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableDictionary *json = [NSJSONSerialization JSONObjectWithData:objectData
+                                                         options:NSJSONReadingMutableContainers
+                                                           error:&jsonError];
+    
+    return json;
+}
 
 
 #endif /* DCSyncConst_h */

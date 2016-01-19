@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "SqliteObject.h"
 #import "sqlitemanager.h"
+#import "DCSyncConst.h"
 
 
 @implementation SqliteObject : NSObject
@@ -120,7 +121,12 @@ static SqliteObject *sqlobj = nil;
         return  nil;
     }
     
-    return result[0];
+    NSMutableDictionary * option = result[0];
+    
+    [option setValue:stringToJson([option valueForKey:@"params"]) forKey:@"params"];
+    [option setValue:stringToJson([option valueForKey:@"event_filter"]) forKey:@"event_filter"];
+    
+    return option;
 }
 
 

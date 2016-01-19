@@ -90,7 +90,7 @@
          Initialize sync option....
          This will be updated with syncoption table record....
          */
-        [self.syncOption setValue:@"https://datacollector.kju.com/DC2" forKey:@"url"];
+        [self.syncOption setValue:DCSYNC_WSE_URL forKey:@"url"];
         [self.syncOption setValue:@1440 forKey:@"interval"];
         [self.syncOption setValue:DCSYNC_TESTER forKey:@"username"];
         [self.syncOption setValue:DCSYNC_PASSWORD forKey:@"password"];
@@ -117,6 +117,15 @@
   CFStringRef string = CFUUIDCreateString(NULL, theUUID);
   CFRelease(theUUID);
   return (__bridge NSString *)string;
+}
+
+-(NSString *)jsonToString:(id) json {
+    if (json == nil)
+        return @"{}";
+    
+    NSError *writeError = nil;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted error:&writeError];
+    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
 }
 
 
@@ -337,6 +346,7 @@
     }
     
     NSData * filesData = [NSJSONSerialization dataWithJSONObject:[document valueForKey:@"files"] options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
+    [document setValue:jsonToString([document valueForKey:@"document"]) forKey:@"document"];
     
     if (filesData)
         [document setValue:[[NSString alloc] initWithData:filesData encoding:NSUTF8StringEncoding] forKey:@"files"];
@@ -528,7 +538,7 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
                             @"upload_only": @0,
                             @"duid":[self.syncOption valueForKey:@"duid"],
                             @"locale":currentLanguage,
-                            @"extra_params": @[],
+                            @"extra_params": [self.syncOption valueForKey:@"params"],
                             @"upload_documents":self.arrUnsyncedFiles};
     
     NSString * url = [NSString stringWithFormat:@"%@/%@", [self.syncOption valueForKey:@"url"], DCSYNC_WSE_SYNC];
@@ -560,8 +570,9 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     [self.syncOption setValue:[syncOption valueForKey:@"interval"] forKey:@"interval"];
     [self.syncOption setValue:[syncOption valueForKey:@"locale"] forKey:@"locale"];
     [self.syncOption setValue:[syncOption valueForKey:@"insistOnBackground"] forKey:@"insistOnBackground"];
-    [self.syncOption setValue:[syncOption valueForKey:@"param"] forKey:@"param"];
-    [self.syncOption setValue:[syncOption valueForKey:@"event_filter"] forKey:@"event_filter"];
+    
+    [self.syncOption setValue:[self jsonToString:[syncOption valueForKey:@"params"]] forKey:@"params"];
+    [self.syncOption setValue:[self jsonToString:[syncOption valueForKey:@"event_filter"]] forKey:@"event_filter"];
     
     [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
     

@@ -60,9 +60,7 @@ DataCollectorAPI * api;
         id value = [param valueForKey:key];
         
         if ([key isEqualToString:@"upload_documents"]) {
-            NSError *writeError = nil;
-            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:value options:NSJSONWritingPrettyPrinted error:&writeError];
-            value = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            value = jsonToString(value);
         }
         
         [postData appendData:[[NSString stringWithFormat:@"Content-Disposition:form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
