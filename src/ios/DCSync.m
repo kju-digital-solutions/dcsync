@@ -581,40 +581,48 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     if (limit == 0)
         limit = MAX_RESULTS_FOR_SEARCHDOCUMENT;
     
-    CDVPluginResult* result = nil;
-    
-    NSMutableArray * arrResult = [[NSMutableArray alloc] init];
-    
-    NSArray * arrDocs = [[SqliteObject sharedSQLObj] searchDocument:paramQuery
-                                                                    option:paramOption];
-    
-    /*
-     arrDocs --- >
-     */
-    
-    //NSDictionary *dictA = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y", @"z":@"m"}}, @"e"]};
-    //NSDictionary *dictB = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y"}}]};
-    
-    
-    
-    for (NSDictionary * doc in arrDocs) {
-        NSDictionary * document = [doc valueForKey:@"document"];
+    [self.commandDelegate runInBackground:^{
+        CDVPluginResult* result = nil;
+        NSUInteger _limit = limit;
         
-        if([self isDictonaryA:document hasContain:paramQuery]) {
-            [arrResult addObject:doc];
+        // Some blocking logic...
+        
+        
+        NSMutableArray * arrResult = [[NSMutableArray alloc] init];
+        
+        NSArray * arrDocs = [[SqliteObject sharedSQLObj] searchDocument:paramQuery
+                                                                 option:paramOption];
+        
+        /*
+         arrDocs --- >
+         */
+        
+        //NSDictionary *dictA = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y", @"z":@"m"}}, @"e"]};
+        //NSDictionary *dictB = @{@"a":@[@"b", @"c", @{@"d":@{@"x":@"y"}}]};
+        
+        
+        
+        for (NSDictionary * doc in arrDocs) {
+            NSDictionary * document = [doc valueForKey:@"document"];
+            
+            if([self isDictonaryA:document hasContain:paramQuery]) {
+                [arrResult addObject:doc];
+            }
         }
-    }
-    
-    NSArray * arrSubResult = @[];
-    
-    if (start < [arrResult count]) {
-        limit = MIN(limit, [arrResult count] - start);
         
-        arrSubResult = [arrResult subarrayWithRange:NSMakeRange(start, limit)];
-    }
+        NSArray * arrSubResult = @[];
+        
+        if (start < [arrResult count]) {
+            _limit = MIN(_limit, [arrResult count] - start);
+            
+            arrSubResult = [arrResult subarrayWithRange:NSMakeRange(start, _limit)];
+        }
+        
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrSubResult];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    }];
     
-    result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:arrSubResult];
-    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+    
 }
 
 - (BOOL)isDictonaryA:(NSDictionary *)dictA
