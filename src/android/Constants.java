@@ -15,11 +15,7 @@
  */
 
 package at.kju.datacollector;
-
-
 import android.content.Context;
-
-import at.kju.dcbootstrap.R;
 
 public class Constants {
 
