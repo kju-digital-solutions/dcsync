@@ -105,10 +105,15 @@ static SqliteObject *sqlobj = nil;
 }
 
 -(BOOL)saveSyncOption:(NSMutableDictionary *)option {
-    // Reset id..
-    [option setValue:@0 forKey:@"id"];
+    NSMutableDictionary * opt = [option mutableCopy];
     
-    [[SQLiteManager singleton] update:option into:@"SYNCOPTION" primaryKey:@"id"];
+    // Reset id..
+    [opt setValue:@0 forKey:@"id"];
+    
+    [opt setValue:jsonToString([opt valueForKey:@"params"]) forKey:@"params"];
+    [opt setValue:jsonToString([opt valueForKey:@"event_filter"]) forKey:@"event_filter"];
+    
+    [[SQLiteManager singleton] update:opt into:@"SYNCOPTION" primaryKey:@"id"];
     
     return YES;
 }
@@ -164,6 +169,9 @@ static SqliteObject *sqlobj = nil;
         }
         else if ([dcd valueForKey:@"unsynced"]) {
             [dcd setValue:[NSNumber numberWithBool:FALSE] forKey:@"unsynced"];
+            
+            [dcd setValue:jsonToString([dcd valueForKey:@"document"]) forKey:@"document"];
+            [dcd setValue:jsonToString([dcd valueForKey:@"files"]) forKey:@"files"];
             
             [[SQLiteManager singleton] update:dcd into:@"DCDOCUMENTS" primaryKey:@"cid"];
         }
@@ -253,7 +261,12 @@ static SqliteObject *sqlobj = nil;
 
 
 -(int)updateDCD:(NSMutableDictionary *) document {
-    return [[SQLiteManager singleton] update:document into:@"DCDOCUMENTS" primaryKey:@"cid"];
+    NSMutableDictionary * doc = [document mutableCopy];
+    
+    [doc setValue:jsonToString([doc valueForKey:@"document"]) forKey:@"document"];
+    [doc setValue:jsonToString([doc valueForKey:@"files"]) forKey:@"files"];
+    
+    return [[SQLiteManager singleton] update:doc into:@"DCDOCUMENTS" primaryKey:@"cid"];
 }
 
 -(double)getLatestSyncDate {

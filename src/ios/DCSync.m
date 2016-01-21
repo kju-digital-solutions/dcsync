@@ -53,7 +53,7 @@
     //[self.param setValue:[[[UIDevice currentDevice] identifierForVendor] UUIDString] forKey:@"duid"];
     [self.syncOption setValue:@"" forKey:@"token"];
     [self.syncOption setValue:@"" forKey:@"sync_timestamp"];
-    [self.syncOption setValue:[self GetUUID] forKey:@"duid"];
+    [self.syncOption setValue:GetUUID() forKey:@"duid"];
     
     self.batchCounter = self.percentagePerBatch = 0;
     
@@ -85,7 +85,6 @@
     }
     else {
         self.syncOption = [NSMutableDictionary new];
-        
         /*
          Initialize sync option....
          This will be updated with syncoption table record....
@@ -94,7 +93,7 @@
         [self.syncOption setValue:@1440 forKey:@"interval"];
         [self.syncOption setValue:DCSYNC_TESTER forKey:@"username"];
         [self.syncOption setValue:DCSYNC_PASSWORD forKey:@"password"];
-        [self.syncOption setValue:[self GetUUID] forKey:@"duid"];
+        [self.syncOption setValue:GetUUID() forKey:@"duid"];
         [self.syncOption setValue:@{} forKey:@"params"];
         [self.syncOption setValue:@false forKey:@"insistOnBackground"];
         [self.syncOption setValue:@{} forKey:@"event_filter"];
@@ -111,41 +110,10 @@
     
 }
 
--(NSString *)GetUUID
-{
-  CFUUIDRef theUUID = CFUUIDCreate(NULL);
-  CFStringRef string = CFUUIDCreateString(NULL, theUUID);
-  CFRelease(theUUID);
-  return (__bridge NSString *)string;
-}
-
--(NSString *)jsonToString:(id) json {
-    if (json == nil)
-        return @"{}";
-    
-    NSError *writeError = nil;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:json options:NSJSONWritingPrettyPrinted error:&writeError];
-    return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-}
-
-
--(NSString*)sha256HashFor:(NSString*)input
-{
-    const char* str = [input UTF8String];
-    
-    unsigned char result[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(str, strlen(str), result);
-    
-    NSData *pwHashData = [[NSData alloc] initWithBytes:result length: sizeof result];
-    //And take Base64 of that
-    NSString *base64 = [pwHashData base64Encoding];
-    return base64;
-}
-
 
 - (void)authenticate:(CDVInvokedUrlCommand*)command; {
     NSDictionary *param = @{@"u": [self.syncOption valueForKey:@"username"],
-                            @"p": [self sha256HashFor:[self.syncOption valueForKey:@"password"]],
+                            @"p": sha256HashFor([self.syncOption valueForKey:@"password"]),
                             @"d": [self.syncOption valueForKey:@"duid"]
                             };
     
@@ -321,7 +289,7 @@
     
     NSString * cid = [command.arguments objectAtIndex:0];
     
-    if (cid == nil || [cid isEqualToString:@""]) {
+    if (cid == nil || cid == (id)[NSNull null] || [cid isEqualToString:@""]) {
         cid = [self generateCID];
     }
     
@@ -344,12 +312,6 @@
     if (![[document valueForKey:@"local"] boolValue]) {
         [document setValue:[NSNumber numberWithBool:TRUE] forKey:@"unsynced"];
     }
-    
-    NSData * filesData = [NSJSONSerialization dataWithJSONObject:[document valueForKey:@"files"] options:(NSJSONWritingOptions)NSJSONWritingPrettyPrinted error:nil];
-    [document setValue:jsonToString([document valueForKey:@"document"]) forKey:@"document"];
-    
-    if (filesData)
-        [document setValue:[[NSString alloc] initWithData:filesData encoding:NSUTF8StringEncoding] forKey:@"files"];
     
     int ret = [[SqliteObject sharedSQLObj] updateDCD:document];
     
@@ -540,6 +502,8 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     
     self.arrUnsyncedFiles = [[SqliteObject sharedSQLObj] getUnsyncedDocuments];
     
+    NSLog(@"%@", self.arrUnsyncedFiles);
+    
     NSString * stamp = [self.syncOption valueForKey:@"sync_timestamp"];
     
     if (stamp == nil || [stamp isEqualToString:@" "])
@@ -585,8 +549,8 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     [self.syncOption setValue:[syncOption valueForKey:@"locale"] forKey:@"locale"];
     [self.syncOption setValue:[syncOption valueForKey:@"insistOnBackground"] forKey:@"insistOnBackground"];
     
-    [self.syncOption setValue:[self jsonToString:[syncOption valueForKey:@"params"]] forKey:@"params"];
-    [self.syncOption setValue:[self jsonToString:[syncOption valueForKey:@"event_filter"]] forKey:@"event_filter"];
+    [self.syncOption setValue:[syncOption valueForKey:@"params"] forKey:@"params"];
+    [self.syncOption setValue:[syncOption valueForKey:@"event_filter"] forKey:@"event_filter"];
     
     [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
     

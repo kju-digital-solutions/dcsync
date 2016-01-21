@@ -6,6 +6,8 @@
 //
 //
 
+#import <CommonCrypto/CommonDigest.h>
+
 #ifndef DCSyncConst_h
 #define DCSyncConst_h
 
@@ -53,8 +55,32 @@ static NSMutableDictionary * stringToJson(NSString * strVal) {
     NSMutableDictionary *json = [NSJSONSerialization JSONObjectWithData:objectData
                                                          options:NSJSONReadingMutableContainers
                                                            error:&jsonError];
+    if (json == nil)
+        return [@{} mutableCopy];
     
     return json;
+}
+
+static NSString *GetUUID()
+{
+    CFUUIDRef theUUID = CFUUIDCreate(NULL);
+    CFStringRef string = CFUUIDCreateString(NULL, theUUID);
+    CFRelease(theUUID);
+    return (__bridge NSString *)string;
+}
+
+
+static NSString * sha256HashFor(NSString * input)
+{
+    const char* str = [input UTF8String];
+    
+    unsigned char result[CC_SHA256_DIGEST_LENGTH];
+    CC_SHA256(str, strlen(str), result);
+    
+    NSData *pwHashData = [[NSData alloc] initWithBytes:result length: sizeof result];
+    //And take Base64 of that
+    NSString *base64 = [pwHashData base64Encoding];
+    return base64;
 }
 
 
