@@ -26,19 +26,19 @@ public class Constants {
 	 */
 	public static int getAccTypeId(Context ctx) {
 		if( _accTypeId == 0)
-			_accTypeId = ctx.getResources().getIdentifier("aam_account_type", "id", ctx.getPackageName());
+			_accTypeId = ctx.getResources().getIdentifier("aam_account_type", "string", ctx.getPackageName());
 		return _accTypeId;
 	}
 	public static String getAccountType(Context ctx) {
 		return (String) ctx.getResources().getText(getAccTypeId(ctx));
 	}
 
-	public static String getAuthTokenType(Context ctx) {
-		return ctx.getPackageName();
+	public static String getAuthTokenType(Context ctx)	{
+		return (String) ctx.getResources().getText(getAccTypeId(ctx));
 	}
 
 	public static String getContentAuthority(Context ctx) {
-		return ctx.getPackageName();
+		return (String) ctx.getResources().getText(getAccTypeId(ctx));
 	}
 
 	public static String HTML_ROOT = "file:///android_asset/common/";
