@@ -15,23 +15,30 @@
  */
 
 package at.kju.datacollector;
-import android.content.Context;
+import android.content.Context; 
 
 public class Constants {
+
+	static int _accTypeId = 0;
 
 	/**
 	 * Account type string.
 	 */
+	public static int getAccTypeId(Context ctx) {
+		if( _accTypeId == 0)
+			_accTypeId = ctx.getResources().getIdentifier("aam_account_type", "id", ctx.getPackageName());
+		return _accTypeId;
+	}
 	public static String getAccountType(Context ctx) {
-		return (String) ctx.getResources().getText(R.string.aam_account_type);
+		return (String) ctx.getResources().getText(getAccTypeId(ctx));
 	}
 
 	public static String getAuthTokenType(Context ctx) {
-		return (String) ctx.getResources().getText(R.string.aam_account_type);
+		return ctx.getPackageName();
 	}
 
 	public static String getContentAuthority(Context ctx) {
-		return (String) ctx.getResources().getText(R.string.aam_account_type);
+		return ctx.getPackageName();
 	}
 
 	public static String HTML_ROOT = "file:///android_asset/common/";
