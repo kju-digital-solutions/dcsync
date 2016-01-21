@@ -33,6 +33,11 @@
 @property (nonatomic) int64_t percentagePerBatch;
 
 
+-(BOOL)safeAssignValue:(NSMutableDictionary *) src
+                  dest:(NSMutableDictionary *) dest
+                   key:(NSString * )key;
+
+
 -(void)sync_progress:(int64_t) bytesWritten
    totalBytesWritten:(int64_t)totalBytesWritten
 totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;

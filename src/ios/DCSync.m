@@ -111,6 +111,23 @@
 }
 
 
+
+
+-(BOOL)safeAssignValue:(NSMutableDictionary *) src
+                   dest:(NSMutableDictionary *) dest
+                   key:(NSString * )key {
+    if ([src valueForKey:key]) {
+        [dest setValue:[src valueForKey:key] forKey:key];
+        
+        return YES;
+    }
+    
+    
+    return NO;
+}
+
+
+
 - (void)authenticate:(CDVInvokedUrlCommand*)command; {
     NSDictionary *param = @{@"u": [self.syncOption valueForKey:@"username"],
                             @"p": sha256HashFor([self.syncOption valueForKey:@"password"]),
@@ -540,17 +557,17 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
     NSString* callbackId = command.callbackId;
     CDVPluginResult* result = nil;
     
-    NSDictionary *syncOption = [command.arguments objectAtIndex:0];
+    NSMutableDictionary *syncOption = [command.arguments objectAtIndex:0];
     
-    [self.syncOption setValue:[syncOption valueForKey:@"url"] forKey:@"url"];
-    [self.syncOption setValue:[syncOption valueForKey:@"username"] forKey:@"username"];
-    [self.syncOption setValue:[syncOption valueForKey:@"password"] forKey:@"password"];
-    [self.syncOption setValue:[syncOption valueForKey:@"interval"] forKey:@"interval"];
-    [self.syncOption setValue:[syncOption valueForKey:@"locale"] forKey:@"locale"];
-    [self.syncOption setValue:[syncOption valueForKey:@"insistOnBackground"] forKey:@"insistOnBackground"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"url"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"username"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"password"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"interval"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"locale"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"insistOnBackground"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"params"];
+    [self safeAssignValue:syncOption dest:self.syncOption key:@"event_filter"];
     
-    [self.syncOption setValue:[syncOption valueForKey:@"params"] forKey:@"params"];
-    [self.syncOption setValue:[syncOption valueForKey:@"event_filter"] forKey:@"event_filter"];
     
     [[SqliteObject sharedSQLObj] saveSyncOption:self.syncOption];
     
