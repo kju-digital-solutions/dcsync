@@ -294,7 +294,11 @@ public class DCSync extends CordovaPlugin {
         try {
             SyncSettings syncs = lssm.getSyncSettings();
             if (syncs.isFilesChanged()) {
-                webView.clearCache();
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    public void run() {
+                         webView.clearCache();
+                     }
+                });
                 syncs.setFilesChanged(false);
                 lssm.setSyncSettings(syncs);
             }
