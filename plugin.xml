@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" 
-       id="cordova-plugin-dcsync" version="0.4.3">
+       id="cordova-plugin-dcsync" version="0.4.4">
         <name>DCSync</name>
         <description>Cordova Datacollector Sync Plugin</description>
         <license>Apache 2.0</license>
@@ -42,8 +42,11 @@
 		        <header-file src="src/ios/SQLiteManager.h" />
 		        <source-file src="src/ios/SQLiteManager.m" compiler-flags="-fno-objc-arc"/>
 		        
-		           <header-file src="src/ios/SQLiteObject.h" />
+		        <header-file src="src/ios/SQLiteObject.h" />
 		        <source-file src="src/ios/SQLiteObject.m" compiler-flags="-fno-objc-arc"/>
+
+		        <header-file src="src/ios/Reachability.h" />
+		        <source-file src="src/ios/Reachability.m"/>
 
 		        <header-file src="src/ios/ZipArchive/minizip/crypt.h" />
 		        <header-file src="src/ios/ZipArchive/minizip/ioapi.h" />

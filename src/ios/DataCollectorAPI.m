@@ -12,6 +12,7 @@
 #import "FilePool.h"
 
 
+
 @implementation DataCollectorAPI : NSObject
 
 DataCollectorAPI * api;
@@ -23,11 +24,48 @@ DataCollectorAPI * api;
     return api;
 }
 
--(void)sync:(NSDictionary * )param
+-(int)checkConnectivity:(NSString *)url {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNetworkChange:) name:kReachabilityChangedNotification object:nil];
+    
+    self.reachability = [Reachability reachabilityForInternetConnection];
+    [self.reachability startNotifier];
+    
+    NetworkStatus remoteHostStatus = [self.reachability currentReachabilityStatus];
+    
+    if(remoteHostStatus == NotReachable) {
+        return 0;
+    }
+    else if (remoteHostStatus == ReachableViaWiFi) {
+        return 1;
+    }
+    else if (remoteHostStatus == ReachableViaWWAN) {
+        return 2;
+    }
+}
+
+- (void) handleNetworkChange:(NSNotification *)notice
+{
+    
+    NetworkStatus remoteHostStatus = [self.reachability currentReachabilityStatus];
+    
+    if(remoteHostStatus == NotReachable) {NSLog(@"no");}
+    else if (remoteHostStatus == ReachableViaWiFi) {NSLog(@"wifi"); }
+    else if (remoteHostStatus == ReachableViaWWAN) {NSLog(@"cell"); }
+}
+
+
+-(int)sync:(NSDictionary * )param
         url:(NSString *) url
    listener:(DCSync *)listener {
     
     NSString *boundary = @"---011000010111000001101001";
+    
+    /*
+        Check connectivity.
+     */
+    if ([self checkConnectivity:url] == 0)
+        return -1;
+    
 
     NSString * strURL = url;//[NSString stringWithFormat:@"%@%@", DCSYNC_WSE_URL, DCSYNC_WSE_SYNC];
     NSURL *URL = [NSURL URLWithString:strURL];
@@ -121,6 +159,8 @@ DataCollectorAPI * api;
     
     // Start the task
     [task resume];
+    
+    return 0;
 }
 
 -(void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask didWriteData:(int64_t)bytesWritten totalBytesWritten:(int64_t)totalBytesWritten totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite {

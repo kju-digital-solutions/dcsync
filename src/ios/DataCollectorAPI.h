@@ -10,6 +10,7 @@
 #define DataCollectorAPI_h
 
 #import "DCSync.h"
+#import "Reachability.h"
 
 @interface DataCollectorAPI : NSObject <NSURLSessionTaskDelegate>
 
@@ -18,13 +19,16 @@
 -(void)authenticate:(NSString *) username
            password:(NSString *)password;
 
--(void)sync:(NSDictionary *) param
+-(int)checkConnectivity:(NSString *)url;
+-(int)sync:(NSDictionary *) param
         url:(NSString *) url
    listener:(DCSync *)listener;
 
 
 @property (nonatomic, retain) NSString *rootPath;
 @property (nonatomic, retain) DCSync * listener;
+@property (nonatomic, retain) Reachability * reachability;
+
 
 @end
 

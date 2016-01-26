@@ -537,8 +537,13 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
                             @"upload_documents":self.arrUnsyncedFiles};
     
     NSString * url = [NSString stringWithFormat:@"%@/%@", [self.syncOption valueForKey:@"url"], DCSYNC_WSE_SYNC];
-                                        
-    [[DataCollectorAPI sharedAPI] sync:param url:url listener:self];
+    
+    if ([[DataCollectorAPI sharedAPI] sync:param url:url listener:self] == -1) {
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No internet connection."];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        
+        return;
+    }
     
     result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Sync started."];
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
