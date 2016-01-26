@@ -171,7 +171,7 @@
                                                             if (command) {
                                                                 CDVPluginResult* result = nil;
                                                                 
-                                                                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@"Authentication failed..."];
+                                                                result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Authentication failed..."];
                                                                 [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
                                                             }
                                                             
