@@ -127,6 +127,8 @@ public class DCSync extends CordovaPlugin {
                             dcd.setCreatorDuid(settings.getDuid());
                         if( dcd.getCreationDate() == 0)
                             dcd.setCreationDate(lssm.getUTCDate());
+                        if( dcd.getCid() == null ||  dcd.getCid().isEmpty() )
+                            dcd.setCid(UUID.randomUUID().toString());
                         dcd.setModifiedUser(settings.getUsername());
                         dcd.setModifiedDuid(settings.getDuid());
                         dcd.setModifiedDate(lssm.getUTCDate());
@@ -228,7 +230,7 @@ public class DCSync extends CordovaPlugin {
                             }
                         }
 
-                        List<DCDocument> list = lssm.searchDCDocuments(documentFilter, where,params.toArray(new String[params.size()]),exactMatch, options.optInt("skipResults", 0), options.optInt("maxResults", 100));
+                        List<DCDocument> list = lssm.searchDCDocuments(documentFilter, where, params.toArray(new String[params.size()]), exactMatch, options.optInt("skipResults", 0), options.optInt("maxResults", 100));
                         JSONArray arr = new JSONArray();
                         for( DCDocument dc : list) {
                             arr.put(dc.toJSON());

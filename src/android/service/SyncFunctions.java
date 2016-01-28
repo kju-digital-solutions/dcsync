@@ -179,7 +179,7 @@ public class SyncFunctions {
 				mphelper.addFormField("t", authtoken);
 				mphelper.addFormField("v", appVersion);
 				mphelper.addFormField("duid", s.getDuid());
-				mphelper.addFormField("locale", s.getLocale());
+				mphelper.addFormField("locale", lssm.getContext().getResources().getConfiguration().locale.toString());
 				mphelper.addFormField("params", (s.getParams() == null) ? null : s.getParams().toString());
 				mphelper.addFormField("upload_only", "0");
 				mphelper.addFormField("sync_timestamp", syncTS);
