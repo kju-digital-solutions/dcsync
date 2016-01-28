@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import at.kju.datacollector.Constants;
 import at.kju.datacollector.client.DCDocument;
 import at.kju.datacollector.client.SyncSettings;
+import at.kju.datacollector.helpers.JsonCompare;
 
 /**
  * Created by lw on 19.11.2015.
@@ -67,11 +68,9 @@ public class DCRepository {
         }
     }
 
-    public List<DCDocument> searchDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException {
+    public List<DCDocument> searchDCDocuments(JSONObject documentFilter, String where, String[] whereParams, boolean exactMatch, int startRow, int maxResults ) throws RemoteException {
         ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         List<DCDocument> retList = new ArrayList<DCDocument>();
-        if( documentSearchmap == null)
-            documentSearchmap = new HashMap<String, String>();
         Cursor c = null;
         try {
             List<String> params = new ArrayList<String>();
@@ -79,14 +78,6 @@ public class DCRepository {
                 params.add(p);
             }
             List<Pattern> patterns = new ArrayList<Pattern>();
-            for (String key : documentSearchmap.keySet()) {
-                String like = "%\"" + key + "\":\"" + (exactMatch ? "" : "%" ) + documentSearchmap.get(key) + (exactMatch ? "" : "%" ) + "\"%";
-                params.add(like);
-                where = where + " and document like ?";
-                if( !exactMatch) {
-                    patterns.add(Pattern.compile("^.*\"" +  Pattern.quote(key) + "\":\"[^\"]*" + Pattern.quote(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
-                }
-            }
 
 
             c = cp.query(DCContentProvider._documentsUri, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE, DCDataHelper.LOCAL},
@@ -94,18 +85,9 @@ public class DCRepository {
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);
-                boolean matches = true;
-                if( patterns.size()> 0) {
-                    String doc = fd.getDocument().toString();
-                    for (Pattern p : patterns) {
-                        if (!p.matcher(doc).matches()) {
-                            matches = false;
-                            break;
-                        }
-                    }
-                }
-                if( !matches )
-                    continue;
+
+                if( documentFilter != null && !JsonCompare.compare(documentFilter,fd.getDocument() ))
+                   continue;
                 nRow++;
                 if( startRow > nRow)
                     continue;
@@ -126,45 +108,25 @@ public class DCRepository {
         return retList;
     }
 
-    public List<DCDocument> countDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
+    public List<DCDocument> countDCDocuments(JSONObject documentFilter, String where, String[] whereParams, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
         ContentProviderClient cp = mCtx.getContentResolver().acquireContentProviderClient(Constants.getContentAuthority(mCtx));
         List<DCDocument> retList = new ArrayList<DCDocument>();
-        if( documentSearchmap == null)
-            documentSearchmap = new HashMap<String, String>();
+
         Cursor c = null;
         try {
             List<String> params = new ArrayList<String>();
             for( String p : whereParams) {
                 params.add(p);
             }
-            List<Pattern> patterns = new ArrayList<Pattern>();
-            for (String key : documentSearchmap.keySet()) {
-                String like = "%\"" + key + "\":\"" + (exactMatch ? "" : "%" ) + documentSearchmap.get(key) + (exactMatch ? "" : "%" ) + "\"%";
-                params.add(like);
-                where = where + " and document like ?";
-                if( !exactMatch) {
-                    patterns.add(Pattern.compile("^.*\"" +  Pattern.quote(key) + "\":\"[^\"]*" +  Pattern.quote(documentSearchmap.get(key)) + "[^\"]*\".*$", Pattern.CASE_INSENSITIVE));
-                }
-            }
-
 
             c = cp.query(DCContentProvider._documentsUri, new String[] {DCDataHelper.CID, DCDataHelper.CREATOR_DUID, DCDataHelper.MODIFIED_DUID, DCDataHelper.CREATION_DATE, DCDataHelper.MODIFIED_DATE, DCDataHelper.SERVER_MODIFIED,DCDataHelper.CREATOR_USER, DCDataHelper.MODIFIED_USER, DCDataHelper.DOCUMENT, DCDataHelper.FILES, DCDataHelper.PATH, DCDataHelper.SYNC_STATE},
                     where ,params.toArray(new String[params.size()]), null);
             int nRow = -1;
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
                 DCDocument fd = new DCDocument(c.getString(0), c.getString(1), c.getString(2), c.getInt(3), c.getInt(4), c.getInt(5),  c.getString(6), c.getString(7), c.getString(8), c.getString(9), c.getString(10),c.getInt(11) == DCDataHelper.SYNC_STATE_DELETED, false, c.getInt(12)==1);
-                boolean matches = true;
-                if( patterns.size()> 0) {
-                    String doc = fd.getDocument().toString();
-                    for( Pattern p : patterns) {
-                        if( ! p.matcher(doc).matches() ) {
-                            matches = false;
-                            break;
-                        }
-                    }
-                }
-                if( !matches )
+                if( documentFilter != null && !JsonCompare.compare(documentFilter,fd.getDocument() ))
                     continue;
+
                 nRow++;
                 if( startRow > nRow)
                     continue;

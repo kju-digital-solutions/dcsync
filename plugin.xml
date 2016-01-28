@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" 
-       id="cordova-plugin-dcsync" version="0.5.0">
+       id="cordova-plugin-dcsync" version="0.5.1">
         <name>DCSync</name>
         <description>Cordova Datacollector Sync Plugin</description>
         <license>Apache 2.0</license>
@@ -96,6 +96,7 @@
 			<source-file src="src/android/service/SyncService.java" target-dir="src/at/kju/datacollector/service" />
 			<source-file src="src/android/service/SyncFunctions.java" target-dir="src/at/kju/datacollector/service" />
 
+			<source-file src="src/android/helpers/JsonCompare.java" target-dir="src/at/kju/datacollector/helpers" />
 			<source-file src="src/android/helpers/JsonHelper.java" target-dir="src/at/kju/datacollector/helpers" />
 			<source-file src="src/android/helpers/MultipartUtility.java" target-dir="src/at/kju/datacollector/helpers" />
 			<source-file src="src/android/client/DCDocument.java" target-dir="src/at/kju/datacollector/client" />

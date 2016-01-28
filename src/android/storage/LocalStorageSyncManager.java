@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
 
+import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,9 +97,9 @@ public class LocalStorageSyncManager {
 	}
 
 	public List<DCDocument> getUpSyncDocs() throws RemoteException {
-		return repo.searchDCDocuments(DCDataHelper.SYNC_STATE + " in (?,?,?)" ,
+		return repo.searchDCDocuments(null, DCDataHelper.SYNC_STATE + " in (?,?,?)" ,
 				new String[]{ String.valueOf(DCDataHelper.SYNC_STATE_MODIFIED), String.valueOf(DCDataHelper.SYNC_STATE_DELETED),String.valueOf(DCDataHelper.SYNC_STATE_NEW)}
-				,null, false, 0, 1000);
+				, false, 0, 1000);
 	}
 
 	public void markAsSynced(List<DCDocument> docs) throws RemoteException, OperationApplicationException {
@@ -212,13 +214,13 @@ public class LocalStorageSyncManager {
 	}
 	
 	public DCDocument getData(String uuid) throws Exception {
-		List<DCDocument> retlist = repo.searchDCDocuments(DCDataHelper.CID + "=?", new String[] {uuid},null, false, 0, 1 );
+		List<DCDocument> retlist = repo.searchDCDocuments(null, DCDataHelper.CID + "=?", new String[] {uuid}, false, 0, 1 );
 		if( retlist == null || retlist.size() == 0)
 			return null;
 		return retlist.get(0);
 	}
-	public List<DCDocument>  searchDCDocuments(String where, String[] whereParams, HashMap<String, String> documentSearchmap, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
-		return repo.searchDCDocuments(where, whereParams, documentSearchmap, exactMatch, startRow, maxResults);
+	public List<DCDocument>  searchDCDocuments(JSONObject documentFilter, String where, String[] whereParams, boolean exactMatch, int startRow, int maxResults ) throws RemoteException{
+		return repo.searchDCDocuments(documentFilter, where, whereParams, exactMatch, startRow, maxResults);
 
 	}
 
