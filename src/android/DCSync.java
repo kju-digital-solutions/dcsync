@@ -1,7 +1,5 @@
 package at.kju.datacollector;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,8 +27,8 @@ import java.util.UUID;
 
 import at.kju.datacollector.client.DCDocument;
 import at.kju.datacollector.client.SyncSettings;
+import at.kju.datacollector.service.SyncService;
 import at.kju.datacollector.storage.LocalStorageSyncManager;
-import at.kju.datacollector.syncadapter.SyncService;
 
 /**
  * Created by lw on 16.11.2015.
@@ -248,28 +246,10 @@ public class DCSync extends CordovaPlugin {
             });
         }
         else if ("performSync".equals(action)) {
-            cordova.getThreadPool().execute(new Runnable() {
-                public void run() {
-                    try {
-                        AccountManager am = AccountManager.get(webView.getContext());
-                        Account[] accounts = am.getAccountsByType(Constants.getAccountType(webView.getContext()));
-                        Account account = null;
-                        if (accounts.length != 0) {
-                            account = accounts[0];
-                        }
-                        Bundle b = new Bundle();
-                        b.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
-                        am.invalidateAuthToken(Constants.getAccountType(webView.getContext()), AccountManager.get(webView.getContext()).peekAuthToken(account, Constants.getAuthTokenType(webView.getContext())));
-                        ContentResolver.requestSync(account, Constants.getContentAuthority(webView.getContext()), b);
-
-                        callbackContext.success();
-                    } catch (Exception ex) {
-                        callbackContext.error(ex.toString());
-                    }
-                }
-            });
+            webView.getContext().startService(new Intent(webView.getContext(), SyncService.class));
+            callbackContext.success();
         }
-            return true;
+        return true;
 
     }
 
@@ -277,7 +257,7 @@ public class DCSync extends CordovaPlugin {
 
         JSONObject obj = new JSONObject();
         try {
-            obj = new JSONObject(intent.getStringExtra(SyncService.EXTRA_EVENT));
+            obj = new JSONObject(intent.getStringExtra(Constants.getExtraEvent(webView.getContext())));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
         }
@@ -313,7 +293,7 @@ public class DCSync extends CordovaPlugin {
 
         checkFilesChanged();
 
-        IntentFilter intentFilter = new IntentFilter(SyncService.UPDATE_INTENT);
+        IntentFilter intentFilter = new IntentFilter(Constants.getUpdateIntent(webView.getContext()));
 
         this.receiver = new BroadcastReceiver() {
             @Override

@@ -1,4 +1,4 @@
-package at.kju.datacollector.authenticator;
+package at.kju.datacollector.helpers;
 
 import android.util.JsonReader;
 import android.util.JsonToken;

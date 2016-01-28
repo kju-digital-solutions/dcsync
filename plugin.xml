@@ -74,55 +74,37 @@
 			</config-file>
 			<config-file target="AndroidManifest.xml" parent="/manifest">
 				<uses-permission android:name="android.permission.INTERNET" />
-				<uses-permission android:name="android.permission.GET_ACCOUNTS" />
-				<uses-permission android:name="android.permission.USE_CREDENTIALS" />
-				<uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
-				<uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
-				<uses-permission android:name="android.permission.READ_SYNC_STATS" />
-				<uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-				<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 			</config-file>
 
 			<config-file target="res/values/strings.xml" parent="/*">
-				<string name="aam_account_type">at.kju.saloncarcollector</string>
+				<string name="content_authority">at.kju.datacollector</string>
 			</config-file> 
 			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
-			
-				<provider android:authorities="at.kju.saloncarcollector" android:exported="true" android:name="at.kju.datacollector.storage.DCContentProvider" />
-				<service android:exported="true" android:name="at.kju.datacollector.authenticator.AuthenticationService">
-					<intent-filter>
-						<action android:name="android.accounts.AccountAuthenticator" />
-					</intent-filter>
-					<meta-data android:name="android.accounts.AccountAuthenticator" android:resource="@xml/authenticator" />
-				</service>
-				<service android:exported="false" android:name="at.kju.datacollector.syncadapter.SyncService">
-					<intent-filter>
-						<action android:name="android.content.SyncAdapter" />
-					</intent-filter>
-					<meta-data android:name="android.content.SyncAdapter" android:resource="@xml/syncadapter" />
-				</service>
+				<provider android:authorities="@string/content_authority" android:exported="false" android:name="at.kju.datacollector.storage.DCContentProvider" />
+				<service android:exported="false" android:name="at.kju.datacollector.service.SyncService"/>
+				<receiver android:name="at.kju.datacollector.service.StartupReceiver" >
+				            <intent-filter>
+				                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+				            </intent-filter>
+        			</receiver>
 			</config-file>
-		
-			<resource-file src="res/xml/authenticator.xml" target="res/xml/authenticator.xml" />
-			<resource-file src="res/xml/syncadapter.xml" target="res/xml/syncadapter.xml" />
 			
 			<source-file src="src/android/Constants.java" target-dir="src/at/kju/datacollector" />
 			<source-file src="src/android/DCSync.java" target-dir="src/at/kju/datacollector" />
-			<source-file src="src/android/authenticator/AuthenticationService.java" target-dir="src/at/kju/datacollector/authenticator" />
-			<source-file src="src/android/authenticator/Authenticator.java" target-dir="src/at/kju/datacollector/authenticator" />
-			<source-file src="src/android/authenticator/JsonHelper.java" target-dir="src/at/kju/datacollector/authenticator" />
+			<source-file src="src/android/service/StartupReceiver.java" target-dir="src/at/kju/datacollector/service" />
+			<source-file src="src/android/service/SyncService.java" target-dir="src/at/kju/datacollector/service" />
+			<source-file src="src/android/service/SyncFunctions.java" target-dir="src/at/kju/datacollector/service" />
+
+			<source-file src="src/android/helpers/JsonHelper.java" target-dir="src/at/kju/datacollector/helpers" />
+			<source-file src="src/android/helpers/MultipartUtility.java" target-dir="src/at/kju/datacollector/helpers" />
 			<source-file src="src/android/client/DCDocument.java" target-dir="src/at/kju/datacollector/client" />
-			<source-file src="src/android/client/MultipartUtility.java" target-dir="src/at/kju/datacollector/client" />
-			<source-file src="src/android/client/NetworkUtilities.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/SyncSettings.java" target-dir="src/at/kju/datacollector/client" />
 			<source-file src="src/android/client/Progress.java" target-dir="src/at/kju/datacollector/client" />
+			
 			<source-file src="src/android/storage/DCContentProvider.java" target-dir="src/at/kju/datacollector/storage" />
 			<source-file src="src/android/storage/DCDataHelper.java" target-dir="src/at/kju/datacollector/storage" />
 			<source-file src="src/android/storage/DCRepository.java" target-dir="src/at/kju/datacollector/storage" />
 			<source-file src="src/android/storage/LocalStorageSyncManager.java" target-dir="src/at/kju/datacollector/storage" />
-			<source-file src="src/android/syncadapter/SyncAdapter.java" target-dir="src/at/kju/datacollector/syncadapter" />
-			<source-file src="src/android/syncadapter/SyncService.java" target-dir="src/at/kju/datacollector/syncadapter" />
-			<!--<resource-file src="FooPluginStrings.xml" target="res/values/FooPluginStrings.xml" />-->
         </platform>
     </plugin>

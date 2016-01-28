@@ -4,7 +4,6 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
-import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
@@ -80,45 +79,13 @@ public class LocalStorageSyncManager {
 		SyncSettings settingsOld = repo.getSyncSettings();
 		repo.setSyncSettings(settings);
 
-		ensureAccount(settings);
-
 		if( settingsOld.getInterval() != settings.getInterval()) {
 			syncIntervalChanged(settings);
 		}
 	}
-	public void ensureAccount(SyncSettings settings) {
-		AccountManager am = AccountManager.get(mCtx);
-		Account[] accounts = am.getAccountsByType(Constants.getAccountType(mCtx));
 
-		if( accounts.length == 0) {
-			Account account = new Account(settings.getUsername(), Constants.getAccountType(mCtx));
-			am.addAccountExplicitly(account, settings.getPasswordHash(), null);
-			ContentResolver.setIsSyncable(account, Constants.getContentAuthority(mCtx), 1);
-			ContentResolver.setSyncAutomatically(account, Constants.getContentAuthority(mCtx), true);
-		}
-	}
 	public void syncIntervalChanged(SyncSettings settings) {
-
-		AccountManager am = AccountManager.get(mCtx);
-		Account[] accounts = am.getAccountsByType(Constants.getAccountType(mCtx));
-		Account account;
-
-		if (accounts.length != 0) {
-			account = accounts[0];
-
-			List<PeriodicSync> syncs = ContentResolver.getPeriodicSyncs(account, Constants.getContentAuthority(mCtx));
-			for( PeriodicSync sync :syncs) {
-				ContentResolver.removePeriodicSync(account,sync.authority, sync.extras);
-			}
-			long interval = settings.getInterval();
-			if( interval > 0) {
-				Bundle params = new Bundle();
-				params.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
-				params.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false);
-				params.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
-				ContentResolver.addPeriodicSync(account,  Constants.getContentAuthority(mCtx), params, interval*60 );
-			}
-		}
+		//todo: interval
 	}
 	public String getFileStorageLocation() {
 		if( checkStorage() )

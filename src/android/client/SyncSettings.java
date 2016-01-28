@@ -16,6 +16,7 @@ public class SyncSettings {
 	private String username;
 	private String passwordHash;
 	private String locale;
+	private String token;
 	private boolean filesChanged;
 
 	public String getUsername() {
@@ -34,6 +35,15 @@ public class SyncSettings {
 		this.passwordHash = password;
 	}
 
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+
 	public void setPassword(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		byte[] hash = digest.digest(password.getBytes("UTF-8"));
@@ -44,7 +54,7 @@ public class SyncSettings {
 	private JSONObject params;
 	private long interval;
 
-	public SyncSettings(Date lastSyncDate, String lastSyncTimestamp, String duid, String locale, String url, JSONObject eventFilter, JSONObject params, int interval, String username, String passwordHash) {
+	public SyncSettings(Date lastSyncDate, String lastSyncTimestamp, String duid, String locale, String url, JSONObject eventFilter, JSONObject params, int interval, String username, String passwordHash, String token) {
 		this.lastSyncDate = lastSyncDate;
 		this.lastSyncTimestamp = lastSyncTimestamp;
 		this.duid = duid;
@@ -55,6 +65,7 @@ public class SyncSettings {
 		this.interval = interval;
 		this.username = username;
 		this.passwordHash = passwordHash;
+		this.token = token;
 	}
 	public SyncSettings(JSONObject obj) throws UnsupportedEncodingException, NoSuchAlgorithmException {
 		this.lastSyncDate = new Date(obj.optLong("lastSyncDate", 0));
@@ -67,7 +78,8 @@ public class SyncSettings {
 		this.interval = obj.optLong("interval");
 		this.username = obj.optString("username");
 		this.passwordHash = obj.optString("password_hash");
-		this.filesChanged = obj.optBoolean("filesChanged",true);
+		this.filesChanged = obj.optBoolean("filesChanged", true);
+		this.token = obj.optString("token");
 		if( obj.has("password")) {
 			this.setPassword(obj.optString("password", ""));
 		}
@@ -79,7 +91,7 @@ public class SyncSettings {
 	public JSONObject toJSON() {
 		JSONObject obj = new JSONObject();
 		try {
-			obj.put("lastSyncDate", getLastSyncDate());
+			obj.put("lastSyncDate", getLastSyncDate().getTime());
 			obj.put("lastSyncTimestamp", getLastSyncTimestamp());
 			obj.put("locale", getLocale() );
 			obj.put("url", getUrl());
@@ -89,6 +101,7 @@ public class SyncSettings {
 			obj.put("username", getUsername() );
 			obj.put("filesChanged", isFilesChanged());
 			obj.put("password_hash", getPasswordHash() );
+			obj.put("token", getToken() );
 		}
 		catch (Exception ex) {
 			throw new RuntimeException(ex);

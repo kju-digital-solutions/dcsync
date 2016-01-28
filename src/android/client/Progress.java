@@ -5,7 +5,7 @@ import android.content.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import at.kju.datacollector.syncadapter.SyncService;
+import at.kju.datacollector.service.SyncService;
 
 /**
  * Created by lw on 23.11.2015.

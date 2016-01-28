@@ -1,4 +1,4 @@
-package at.kju.datacollector.client;
+package at.kju.datacollector.helpers;
 
 import java.io.File;
 import java.io.FileInputStream;

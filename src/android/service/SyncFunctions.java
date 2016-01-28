@@ -14,11 +14,9 @@
  * the License.
  */
 
-package at.kju.datacollector.client;
+package at.kju.datacollector.service;
 
-import android.accounts.Account;
 import android.content.Context;
-import android.os.Handler;
 import android.util.JsonReader;
 import android.util.Log;
 
@@ -44,14 +42,18 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import at.kju.datacollector.authenticator.JsonHelper;
+import at.kju.datacollector.helpers.JsonHelper;
+import at.kju.datacollector.client.DCDocument;
+import at.kju.datacollector.helpers.MultipartUtility;
+import at.kju.datacollector.client.Progress;
+import at.kju.datacollector.client.SyncSettings;
 import at.kju.datacollector.storage.LocalStorageSyncManager;
 
 /**
  * Provides utility methods for communicating with the server.
  */
-public class NetworkUtilities {
-	private static final String TAG = "NetworkUtilities";
+public class SyncFunctions {
+	private static final String TAG = "SyncFunctions";
 	public static final String AUTH_URI = "accesstoken";
 	public static final String SYNC_URL_SUFFIX = "sync";
 	private static final int MAX_BUFFER_SIZE = 20000;
@@ -96,7 +98,7 @@ public class NetworkUtilities {
 	 * @throws JSONException
 	 * @throws ParseException
 	 */
-	public static String authenticate(String username, String password,SyncSettings s, Handler handler,  final Context context) throws ParseException  {
+	public static String authenticate(String username, String password,SyncSettings s,  final Context context) throws ParseException  {
 		HttpURLConnection conn=null;
 		try {
 			String syncUrl = s.getUrl();
@@ -123,26 +125,22 @@ public class NetworkUtilities {
 					responseBody.append(line);
 				in.close();
 				String access_token =new JSONObject(responseBody.toString()).getString("access_token");
-				sendResult(true, handler, context);
 				return access_token;
 			} else {
 				if (Log.isLoggable(TAG, Log.VERBOSE)) {
 					Log.v(TAG, "Error authenticating" + conn.getResponseMessage());
 				}
-				sendResult(false, handler, context);
 				return null;
 			}
 		} catch (final IOException e) {
 			if (Log.isLoggable(TAG, Log.VERBOSE)) {
 				Log.v(TAG, "IOException when getting authtoken", e);
 			}
-			sendResult(false, handler, context);
 			return null;
 		} catch (final JSONException e) {
 			if (Log.isLoggable(TAG, Log.VERBOSE)) {
 				Log.v(TAG, "JSONException when getting authtoken", e);
 			}
-			sendResult(false, handler, context);
 			return null;
 		} finally {
 			try {
@@ -158,56 +156,9 @@ public class NetworkUtilities {
 
 	}
 
-	/**
-	 * Sends the authentication response from server back to the caller main UI
-	 * thread through its handler.
-	 * 
-	 * @param result
-	 *            The boolean holding authentication result
-	 * @param handler
-	 *            The main UI thread's handler instance.
-	 * @param context
-	 *            The caller Activity's context.
-	 */
-	private static void sendResult(final Boolean result, final Handler handler,final Context context) {
-		if (handler == null || context == null) {
-			return;
-		}
-	 	//	handler.post(new Runnable() {public void run() { //	((AuthenticatorActivity) context).onAuthenticationResult(result);}});
-	}
-
-	/**
-	 * Attempts to authenticate the user credentials on the server.
-	 * 
-	 * @param username
-	 *            The user's username
-	 * @param password
-	 *            The user's password to be authenticated
-	 * @param handler
-	 *            The main UI thread's handler instance.
-	 * @param context
-	 *            The caller Activity's context
-	 * @return Thread The thread on which the network mOperations are executed.
-	 */
-	public static Thread attemptAuth(final String username,final String password, final SyncSettings s, final Handler handler,
-			final Context context) {
-		final Runnable runnable = new Runnable() {
-			public void run() {
-				try {
-					authenticate(username, password, s, handler, context);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		};
-		// run on background thread.
-		return NetworkUtilities.performOnBackgroundThread(runnable);
-	}
 
 
-
-	public static boolean sync(Account account, String authtoken, String appVersion, List<DCDocument> fd, SyncSettings s, String fileRoot, Progress p, LocalStorageSyncManager lssm) {
+	public static boolean sync(String username, String authtoken, String appVersion, List<DCDocument> fd, SyncSettings s, String fileRoot, Progress p, LocalStorageSyncManager lssm) {
 		boolean moreToCome = true;
 		String syncTS = s.getLastSyncTimestamp();
 		int nFilesDone = 0;
@@ -224,7 +175,7 @@ public class NetworkUtilities {
 
 				urlconn.setRequestMethod("POST");
 				mphelper.prepareConnection();
-				mphelper.addFormField("u", account.name);
+				mphelper.addFormField("u", username);
 				mphelper.addFormField("t", authtoken);
 				mphelper.addFormField("v", appVersion);
 				mphelper.addFormField("duid", s.getDuid());
