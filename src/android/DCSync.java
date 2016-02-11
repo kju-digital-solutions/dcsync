@@ -258,7 +258,7 @@ public class DCSync extends CordovaPlugin {
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
         }
-        if( obj.optString("eventType")=="sync_completed")
+        if( obj.optString("eventType").equals("sync_completed"))
             checkFilesChanged();
 
         if (this.callbackContext == null)
