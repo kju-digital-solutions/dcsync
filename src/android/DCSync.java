@@ -273,7 +273,7 @@ public class DCSync extends CordovaPlugin {
             if (syncs.isFilesChanged()) {
                 cordova.getActivity().runOnUiThread(new Runnable() {
                     public void run() {
-                         webView.clearCache();
+                         webView.clearCache(true);
                      }
                 });
                 syncs.setFilesChanged(false);
