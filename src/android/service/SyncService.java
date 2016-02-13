@@ -65,8 +65,14 @@ public class SyncService extends Service {
 
         // check the global background data setting
         ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-        if (!cm.getActiveNetworkInfo().isConnected()) {
+        boolean connected = false;
+        try {
+            connected = cm.getActiveNetworkInfo().isConnected();
+        }
+        catch( Exception ex) {
+        }
 
+        if (!connected) {
             Progress p = new Progress(getApplicationContext());
             p.setFailed(new RuntimeException("No Internet Connection"));
             //todo: reschedule
