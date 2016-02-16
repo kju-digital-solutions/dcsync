@@ -29,7 +29,9 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -237,17 +239,42 @@ public class SyncFunctions {
 								ze.getTime();
 								foss.close();
 							} else if (filename.toLowerCase().endsWith("documents.json")) {
-								InputStreamReader jis = new InputStreamReader(zis, "UTF-8");
+								//fix Kitkat, (does not work from input stream)
+								File f = new File(fileRoot + "/tmpDocuments.json");
+								f.getParentFile().mkdirs();
+								FileOutputStream foss = new FileOutputStream (f, false);
+								int count;
+								while ((count = zis.read(buffer)) != -1) {
+									foss.write(buffer, 0, count);
+								}
+								foss.close();
+								InputStreamReader jis = new InputStreamReader(new FileInputStream(f.getPath()), "UTF-8");
+
+								//now do the parsing
+								//InputStreamReader jis = new InputStreamReader(zis);
 								JsonReader reader = new JsonReader(jis);
 								List<DCDocument> dcl = new ArrayList<DCDocument>();
-								reader.beginArray();
-								while (reader.hasNext()) {
-									dcl.add(DCDocument.fromJSON(JsonHelper.handleObject(reader)));
-									p.setRecordsdone(++nRecordsDone);
+								try {
+									reader.beginArray();
+									while (reader.hasNext()) {
+										dcl.add(DCDocument.fromJSON(JsonHelper.handleObject(reader)));
+										p.setRecordsdone(++nRecordsDone);
+										if( dcl.size() > 50) {
+											lssm.saveData(dcl, true, p);
+											dcl = new ArrayList<DCDocument>();
+										}
 
+									}
+									reader.endArray();
 								}
-								reader.endArray();
-								lssm.saveData(dcl, true, p);
+								catch(Exception ex) {
+									throw ex;
+								}
+								if( dcl.size() > 0) {
+									lssm.saveData(dcl, true, p);
+								}
+								//and delete the temp-file
+								f.delete();
 							} else if (filename.toLowerCase().endsWith("sync.json")) {
 								InputStreamReader jis = new InputStreamReader(zis, "UTF-8");
 								JsonReader reader = new JsonReader(jis);
