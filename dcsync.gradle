@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = doExtractStringFromManifest("package")
-		resValue "string", "ccontent_authority", "${applicationId}.authority"
+		resValue "string", "content_authority", "${applicationId}.authority"
     }
 }
 
