@@ -1,0 +1,30 @@
+import java.util.regex.Pattern
+
+def doExtractStringFromManifest(name) {
+    def manifestFile = file(android.sourceSets.main.manifest.srcFile)
+    def pattern = Pattern.compile(name + "=\"(.*?)\"")
+    def matcher = pattern.matcher(manifestFile.getText())
+    matcher.find()
+    return matcher.group(1)
+}
+
+android {
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+        }
+    }
+
+    defaultConfig {
+        applicationId = doExtractStringFromManifest("package")
+		resValue "string", "ccontent_authority", "${applicationId}.authority"
+    }
+}
+
+ext.postBuildExtras = 
+{
+android {
+    useLibrary 'org.apache.http.legacy'
+	println('useLibrary org.apache.http.legacy');
+	}
+}

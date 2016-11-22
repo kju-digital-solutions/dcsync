@@ -67,6 +67,7 @@
 
 			</platform>
 		 <platform name="android">
+		   <framework src="dcsync.gradle" custom="true" type="gradleReference" />
 			<config-file target="res/xml/config.xml" parent="/*">
 				<feature name="DCSync" >
 					<param name="android-package" value="at.kju.datacollector.DCSync"/>
