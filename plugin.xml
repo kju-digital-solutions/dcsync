@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
     <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" 
-       id="cordova-plugin-dcsync" version="0.6.3">
+       id="cordova-plugin-dcsync" version="0.6.4">
         <name>DCSync</name>
         <description>Cordova Datacollector Sync Plugin</description>
         <license>Apache 2.0</license>
@@ -77,9 +77,11 @@
 				<uses-permission android:name="android.permission.INTERNET" />
 			</config-file>
 
+			<!--
 			<config-file target="res/values/strings.xml" parent="/*">
 				<string name="content_authority">at.kju.datacollector</string>
 			</config-file> 
+			-->
 			
 			<config-file target="AndroidManifest.xml" parent="/manifest/application">
 				<provider android:authorities="@string/content_authority" android:exported="false" android:name="at.kju.datacollector.storage.DCContentProvider" />
