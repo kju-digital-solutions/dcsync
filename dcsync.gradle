@@ -21,10 +21,3 @@ android {
     }
 }
 
-ext.postBuildExtras = 
-{
-android {
-    useLibrary 'org.apache.http.legacy'
-	println('useLibrary org.apache.http.legacy');
-	}
-}

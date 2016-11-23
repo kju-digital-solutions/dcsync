@@ -20,8 +20,6 @@ import android.content.Context;
 import android.util.JsonReader;
 import android.util.Log;
 
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthenticationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -100,7 +98,7 @@ public class SyncFunctions {
 	 * @throws JSONException
 	 * @throws ParseException
 	 */
-	public static String authenticate(String username, String password,SyncSettings s,  final Context context) throws ParseException  {
+	public static String authenticate(String username, String password,SyncSettings s,  final Context context)   {
 		HttpURLConnection conn=null;
 		try {
 			String syncUrl = s.getUrl();
@@ -300,7 +298,7 @@ public class SyncFunctions {
 				} else {
 					if (statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
 						Log.e(TAG, "Authentication exception in syncing");
-						throw new AuthenticationException();
+						throw new RuntimeException("Unauthorized");
 					} else {
 						Log.e(TAG, "Server error in sync: " + urlconn.getResponseMessage());
 						throw new IOException();

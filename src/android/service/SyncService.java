@@ -15,8 +15,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
-import org.apache.http.ParseException;
-import org.apache.http.auth.AuthenticationException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -115,12 +113,6 @@ public class SyncService extends Service {
                 p.setFailed(e);
             } catch (final IOException e) {
                 Log.e(TAG, "IOException", e);
-                p.setFailed(e);
-            } catch (final AuthenticationException e) {
-                Log.e(TAG, "AuthenticationException", e);
-                p.setFailed(e);
-            } catch (final ParseException e) {
-                Log.e(TAG, "ParseException", e);
                 p.setFailed(e);
             } catch (final JSONException e) {
                 Log.e(TAG, "JSONException", e);
