@@ -128,7 +128,13 @@ totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite;
 - (void)performSync:(CDVInvokedUrlCommand*)command;
 
 
-
+/*##################################################################################################
+ desc : calls resultCallback with <syncOptions> 
+ 
+ name : getSyncOptions
+ args :
+ ##################################################################################################*/
+- (void)getSyncOptions:(CDVInvokedUrlCommand*)command
 
 
 /*##################################################################################################

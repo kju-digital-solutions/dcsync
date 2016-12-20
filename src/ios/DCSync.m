@@ -213,7 +213,26 @@
     
     [self.commandDelegate sendPluginResult:result callbackId:callbackId];
 }
-
+/*##################################################################################################
+ desc : calls resultCallback with <syncOptions> 
+ 
+ name : getSyncOptions
+ args :
+ ##################################################################################################*/
+- (void)getSyncOptions:(CDVInvokedUrlCommand*)command
+{
+    NSString * callbackId = command.callbackId;
+    CDVPluginResult* result = nil;
+    
+	NSMutableDictionary * so = [[SqliteObject sharedSQLObj] loadSyncOption])
+    
+    if (so == nil)
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDouble:0];
+    else
+        result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:so];
+    
+    [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+}
 
 
 /*##################################################################################################
